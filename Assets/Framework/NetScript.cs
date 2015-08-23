@@ -20,6 +20,7 @@ public class NetScript : MonoBehaviour {
 
 	public delegate void StringRpc (string s);
 	public delegate void IntRpc (int i);
+	public delegate void FloatRpc (float f);
 	public delegate void ObjectRpc (System.Object ob);
 
 	void Awake () {
@@ -57,7 +58,7 @@ public class NetScript : MonoBehaviour {
 
 	void CheckViewId () {
 		if (Backstab.IsActive) {
-			Rpc<int>(VerifyViewId, viewId);
+			Rpc(VerifyViewId, viewId);
 		}
 	}
 
@@ -79,61 +80,29 @@ public class NetScript : MonoBehaviour {
 	protected void Rpc (MethodInfo method, params System.Object[] args) {
 		for (byte i = 0; i < currentSize; i++) {
 			if (rpcs[i] == method) {
-				Rpc(i, args);
+				Backstab.Rpc(viewId, i, args);
 			}
 		}
 	}
 
-	private void Rpc (byte methodId, params System.Object[] args) {
-		Backstab.Rpc(viewId, methodId, args);
-	}
-	
 	public void RecieveRpc (RpcData rpc) {
 		rpcs[rpc.methodId].Invoke(this, rpc.args);
 	}
 
 	//
-	//Stupid Generics
+	//Overload redirects
 	//
 
-	public void RegisterRpc (StringRpc function) {
-		RegisterRpc(function.Method);
-	}
+	protected void RegisterRpc (StringRpc function) { RegisterRpc(function.Method); }
+	protected void RegisterRpc (IntRpc function) { RegisterRpc(function.Method); }
+	protected void RegisterRpc (FloatRpc function) { RegisterRpc(function.Method); }
+	protected void RegisterRpc (ObjectRpc function) { RegisterRpc(function.Method); }
+	protected void RegisterRpc (System.Action function) { RegisterRpc(function.Method); }
 
-	public void RegisterRpc (IntRpc function) {
-		RegisterRpc(function.Method);
-	}
-
-	public void RegisterRpc <t1, t2, t3> (System.Action<t1, t2, t3> function) {
-		RegisterRpc(function.Method);
-	}
-
-	public void RegisterRpc <t1, t2> (System.Action<t1, t2> function) {
-		RegisterRpc(function.Method);
-	}
-
-	public void RegisterRpc <t1> (System.Action<t1> function) {
-		RegisterRpc(function.Method);
-	}
-
-	protected void RegisterRpc (System.Action function) {
-		RegisterRpc(function.Method);
-	}
-
-	protected void Rpc <t1, t2, t3> (System.Action<t1, t2, t3> function, params System.Object[] args) {
-		Rpc(function.Method, args);
-	}
-
-	protected void Rpc <t1, t2> (System.Action<t1, t2> function, params System.Object[] args) {
-		Rpc(function.Method, args);
-	}
-
-	protected void Rpc <t1> (System.Action<t1> function, params System.Object[] args) {
-		Rpc(function.Method, args);
-	}
-
-	protected void Rpc (System.Action function, params System.Object[] args) {
-		Rpc(function.Method, args);
-	}
+	protected void Rpc (StringRpc function, params System.Object[] args) { Rpc(function.Method, args); }
+	protected void Rpc (IntRpc function, params System.Object[] args) { Rpc(function.Method, args); }
+	protected void Rpc (FloatRpc function, params System.Object[] args) { Rpc(function.Method, args); }
+	protected void Rpc (ObjectRpc function, params System.Object[] args) { Rpc(function.Method, args); }
+	protected void Rpc (System.Action function, params System.Object[] args) { Rpc(function.Method, args); }
 
 }

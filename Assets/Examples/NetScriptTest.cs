@@ -12,8 +12,6 @@ public class NetScriptTest : NetScript {
 
 	void Init () {
 		Backstab.Init();
-		RegisterRpc(VerifyRpcsAreWorking);
-		//RegisterRpc<string>(SaySomething);
 		RegisterRpc(SaySomething);
 	}
 
@@ -43,8 +41,7 @@ public class NetScriptTest : NetScript {
 	public override void OnConnected () {
 		boxMessage = "Connected to server.";
 		Backstab.Send(new Message(ViewId, testString));
-		Rpc(VerifyRpcsAreWorking);
-		Rpc<string>(SaySomething, "Hello World");
+		Rpc(SaySomething, "Hello World");
 	}
 
 	public override void OnGotMessage (System.Object message) {
@@ -55,11 +52,7 @@ public class NetScriptTest : NetScript {
 	//Rpcs
 	//
 
-	void VerifyRpcsAreWorking () {
-		Debug.Log("This stuff works.");
-	}
-
 	public void SaySomething (string str) {
 		Debug.Log(str);
-	}	
+	}
 }
