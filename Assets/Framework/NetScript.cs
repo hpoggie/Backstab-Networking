@@ -28,8 +28,8 @@ public class NetScript : MonoBehaviour {
 		viewId = currentId;
 		currentId++;
 
-		RegisterRpc(VerifyViewId);
-		InvokeRepeating("CheckViewId", 0.0f, checkViewIdInterval);
+		//RegisterRpc(VerifyViewId);
+		//InvokeRepeating("CheckViewId", 0.0f, checkViewIdInterval);
 	}
 
 	void OnDestroy () {
@@ -55,7 +55,7 @@ public class NetScript : MonoBehaviour {
 	//
 	//ID Checking
 	//
-
+	/*
 	void CheckViewId () {
 		if (Backstab.IsActive) {
 			Rpc(VerifyViewId, viewId);
@@ -67,7 +67,7 @@ public class NetScript : MonoBehaviour {
 			Debug.LogError("Inconsistent viewIds.");
 		}
 	}
-
+	*/
 	//
 	//Rpcs
 	//
@@ -77,10 +77,10 @@ public class NetScript : MonoBehaviour {
 		currentSize++;
 	}
 
-	protected void Rpc (MethodInfo method, params System.Object[] args) {
+	protected void Rpc (MethodInfo method, int playerId, params System.Object[] args) {
 		for (byte i = 0; i < currentSize; i++) {
 			if (rpcs[i] == method) {
-				Backstab.Rpc(viewId, i, args);
+				Backstab.Rpc(viewId, i, args, playerId);
 			}
 		}
 	}
@@ -99,10 +99,10 @@ public class NetScript : MonoBehaviour {
 	protected void RegisterRpc (ObjectRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (System.Action function) { RegisterRpc(function.Method); }
 
-	protected void Rpc (StringRpc function, params System.Object[] args) { Rpc(function.Method, args); }
-	protected void Rpc (IntRpc function, params System.Object[] args) { Rpc(function.Method, args); }
-	protected void Rpc (FloatRpc function, params System.Object[] args) { Rpc(function.Method, args); }
-	protected void Rpc (ObjectRpc function, params System.Object[] args) { Rpc(function.Method, args); }
-	protected void Rpc (System.Action function, params System.Object[] args) { Rpc(function.Method, args); }
+	protected void Rpc (StringRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
+	//protected void Rpc (IntRpc function, params System.Object[] args) { Rpc(function.Method, args); }
+	//protected void Rpc (FloatRpc function, params System.Object[] args) { Rpc(function.Method, args); }
+	//protected void Rpc (ObjectRpc function, params System.Object[] args) { Rpc(function.Method, args); }
+	//protected void Rpc (System.Action function, params System.Object[] args) { Rpc(function.Method, args); }
 
 }

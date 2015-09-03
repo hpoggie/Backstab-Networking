@@ -48,8 +48,12 @@ public class Backstab : MonoBehaviour {
 	public static int port = 8888;
 	public static int maxConnections = 10;
 
-	public static int localSocketId; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
+	public static int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
 	public static int LocalSocketId { get { return localSocketId; } }
+	public static int serverConnectionId;
+	public static int[] clientSocketIds;
+	public static int numConnections = 0;
+	public static bool IsConnected { get { return isServer; }  }
 	private static int connectionId; //Used to tell message recievers which connection sent the message
 	private static int reliableChannelId;
 	private static int unreliableChannelId;
@@ -64,7 +68,6 @@ public class Backstab : MonoBehaviour {
 	public static void Init () {
 		if (instance == null) {
 			NetworkTransport.Init();
-			Config();
 			MakeInstance();
 		} else {
 			Debug.LogError("Backstab is already initialized.");
@@ -78,11 +81,17 @@ public class Backstab : MonoBehaviour {
 	}
 
 	public static void StartServer () {
-		isServer = true;
+		if (!IsConnected) {
+			isServer = true;
+			OpenSocket(port);
+		} else {
+			Debug.LogError("Can't become a server if already connected.");
+		}
 	}
 
 	//Warning: HEAVY WIZARDRY. I do not know what all of these arguments do.
 	public static void Connect (string ip) {
+		OpenSocket(0);
 		byte error;
 		connectionId = NetworkTransport.Connect(localSocketId, ip, port, 0, out error);
 	}
@@ -96,54 +105,44 @@ public class Backstab : MonoBehaviour {
 	//Sending
 	//
 
-	public static void Rpc (int viewId, byte methodId, System.Object[] args) {
-		Send(new RpcData(viewId, methodId, args));
+	public static void Rpc (int viewId, byte methodId, System.Object[] args, int connectionId) {
+		SendReliable(new RpcData(viewId, methodId, args), connectionId);
 	}
-
+	/*
 	public static void Send (Message message) {
 		SendReliable(message);
 	}
-
-	public static void Send (RpcData rpc) {
-		SendReliable(rpc);
-	}
-
-	public static void Send (System.Object packet) {
-		SendReliable(packet);
-	}
-
-	public static void SendReliable (System.Object packet) {
-		Send(packet, reliableChannelId);
+	*/
+	public static void SendReliable (System.Object packet, int targetId) {
+		Send(packet, reliableChannelId, targetId);
 	}
 	
-	public static void SendUnreliable (System.Object packet) {
-		Send(packet, unreliableChannelId);
+	public static void SendUnreliable (System.Object packet, int targetId) {
+		Send(packet, unreliableChannelId, targetId);
 	}
 	
-	public static void Send (System.Object packet, int channelId) {
+	public static void Send (System.Object packet, int channelId, int targetId) {
 		byte error;
 		byte[] buffer = new byte[1024];
 		Stream stream = new MemoryStream(buffer);
 		BinaryFormatter formatter = new BinaryFormatter();
 		formatter.Serialize(stream, packet);
-		NetworkTransport.Send(localSocketId, connectionId, channelId, buffer, buffer.Length, out error);
+		NetworkTransport.Send(localSocketId, targetId, channelId, buffer, buffer.Length, out error);
 	}
 	
 	//
 	//Private functions
 	//
 
-	private static void Config () {
+	private static void OpenSocket (int socketPort) {
 		ConnectionConfig config = new ConnectionConfig();
 		reliableChannelId = config.AddChannel(QosType.Reliable);
 		unreliableChannelId = config.AddChannel(QosType.Unreliable);
 		ConnectionConfig.Validate(config);
-		OpenSocket(config);
-	}
 
-	private static void OpenSocket (ConnectionConfig config) {
+		clientSocketIds = new int[maxConnections];
 		HostTopology topology = new HostTopology(config, maxConnections);
-		localSocketId = NetworkTransport.AddHost(topology, port);
+		localSocketId = NetworkTransport.AddHost(topology, socketPort, null);
 		Debug.Log("Opened socket " +localSocketId);
 	}
 
@@ -167,10 +166,13 @@ public class Backstab : MonoBehaviour {
 			case NetworkEventType.Nothing:
 				break;
 			case NetworkEventType.ConnectEvent:
-				if (!isServer) {
-					Debug.LogError("Only the server can recieve connections.");
-					Disconnect();
+				if (isServer) {
+					FindObjectOfType<NetScriptTest>().OnClientConnected();
+					
+					clientSocketIds[numConnections] = recSocketId;
+					numConnections++;
 				} else {
+					serverConnectionId = recConnectionId;
 					foreach (NetScript inst in NetScript.instances) {
 						inst.OnConnected();
 					}
