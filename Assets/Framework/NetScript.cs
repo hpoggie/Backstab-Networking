@@ -36,21 +36,10 @@ public class NetScript : MonoBehaviour {
 		instances.Remove(this);
 	}
 
-	public virtual void OnGotPacket (System.Object packet) {
-		;
-	}
-	
-	public virtual void OnGotMessage (System.Object message) {
-		;
-	}
-	
-	public virtual void OnConnected () {
-		;
-	}
-	
-	public virtual void OnDisconnected () {
-		;
-	}
+	public virtual void OnGotPacket (System.Object packet) { ; }
+	public virtual void OnGotMessage (System.Object message) { ; }
+	public virtual void OnConnected () { ; }
+	public virtual void OnDisconnected () { ; }
 
 	//
 	//ID Checking
@@ -77,16 +66,26 @@ public class NetScript : MonoBehaviour {
 		currentSize++;
 	}
 
+	protected void RpcAll (MethodInfo method, params System.Object[] args) {
+		Backstab.RpcAll(viewId, GetMethodId(method), args);
+	}
+
 	protected void Rpc (MethodInfo method, int playerId, params System.Object[] args) {
-		for (byte i = 0; i < currentSize; i++) {
-			if (rpcs[i] == method) {
-				Backstab.Rpc(viewId, i, args, playerId);
-			}
-		}
+		Backstab.Rpc(viewId, GetMethodId(method), args, playerId);
 	}
 
 	public void RecieveRpc (RpcData rpc) {
 		rpcs[rpc.methodId].Invoke(this, rpc.args);
+	}
+
+	byte GetMethodId (MethodInfo method) {
+		for (byte i = 0; i < currentSize; i++) {
+			if (rpcs[i] == method) {
+				return i;
+			}
+		}
+		Debug.LogError("Method not found. Defaulting to first method in array.");
+		return 0;
 	}
 
 	//
@@ -100,9 +99,15 @@ public class NetScript : MonoBehaviour {
 	protected void RegisterRpc (System.Action function) { RegisterRpc(function.Method); }
 
 	protected void Rpc (StringRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
-	//protected void Rpc (IntRpc function, params System.Object[] args) { Rpc(function.Method, args); }
-	//protected void Rpc (FloatRpc function, params System.Object[] args) { Rpc(function.Method, args); }
-	//protected void Rpc (ObjectRpc function, params System.Object[] args) { Rpc(function.Method, args); }
-	//protected void Rpc (System.Action function, params System.Object[] args) { Rpc(function.Method, args); }
+	protected void Rpc (IntRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
+	protected void Rpc (FloatRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
+	protected void Rpc (ObjectRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
+	protected void Rpc (System.Action function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
+	
+	protected void RpcAll (StringRpc function, params System.Object[] args) { RpcAll(function.Method); }
+	protected void RpcAll (IntRpc function, params System.Object[] args) { RpcAll(function.Method); }
+	protected void RpcAll (FloatRpc function, params System.Object[] args) { RpcAll(function.Method); }
+	protected void RpcAll (ObjectRpc function, params System.Object[] args) { RpcAll(function.Method); }
+	protected void RpcAll (System.Action function, params System.Object[] args) { RpcAll(function.Method); }
 
 }

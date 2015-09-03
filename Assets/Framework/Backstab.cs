@@ -51,7 +51,7 @@ public class Backstab : MonoBehaviour {
 	public static int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
 	public static int LocalSocketId { get { return localSocketId; } }
 	public static int serverConnectionId;
-	public static int[] clientSocketIds;
+	public static int[] clientConnectionIds;
 	public static int numConnections = 0;
 	public static bool IsConnected { get { return isServer; }  }
 	private static int connectionId; //Used to tell message recievers which connection sent the message
@@ -105,6 +105,14 @@ public class Backstab : MonoBehaviour {
 	//Sending
 	//
 
+	public static void RpcAll (int viewId, byte methodId, System.Object[] args) {
+		for (int i = 0; i < Backstab.clientConnectionIds.Length; i++) {
+			if (IsConnectionOk(i)) {
+				Rpc(viewId, methodId, args, i);
+			}
+		}
+	}
+
 	public static void Rpc (int viewId, byte methodId, System.Object[] args, int connectionId) {
 		SendReliable(new RpcData(viewId, methodId, args), connectionId);
 	}
@@ -129,7 +137,24 @@ public class Backstab : MonoBehaviour {
 		formatter.Serialize(stream, packet);
 		NetworkTransport.Send(localSocketId, targetId, channelId, buffer, buffer.Length, out error);
 	}
+
+	//
+	//Recieving
+	//
+
+	static void GetMessage (Message message) {
+		foreach (NetScript inst in NetScript.instances) {
+			if (inst.ViewId == message.sceneId) {
+				inst.OnGotMessage(message.message);
+			}
+		}
+	}
 	
+	static void GetRpc (RpcData rpc) {
+		NetScript inst = NetScript.instances[rpc.sceneId];
+		inst.RecieveRpc(rpc);
+	}
+
 	//
 	//Private functions
 	//
@@ -140,7 +165,7 @@ public class Backstab : MonoBehaviour {
 		unreliableChannelId = config.AddChannel(QosType.Unreliable);
 		ConnectionConfig.Validate(config);
 
-		clientSocketIds = new int[maxConnections];
+		clientConnectionIds = new int[maxConnections];
 		HostTopology topology = new HostTopology(config, maxConnections);
 		localSocketId = NetworkTransport.AddHost(topology, socketPort, null);
 		Debug.Log("Opened socket " +localSocketId);
@@ -169,7 +194,7 @@ public class Backstab : MonoBehaviour {
 				if (isServer) {
 					FindObjectOfType<NetScriptTest>().OnClientConnected();
 					
-					clientSocketIds[numConnections] = recSocketId;
+					clientConnectionIds[numConnections] = recSocketId;
 					numConnections++;
 				} else {
 					serverConnectionId = recConnectionId;
@@ -197,17 +222,14 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	static void GetMessage (Message message) {
-		foreach (NetScript inst in NetScript.instances) {
-			if (inst.ViewId == message.sceneId) {
-				inst.OnGotMessage(message.message);
-			}
-		}
-	}
-
-	static void GetRpc (RpcData rpc) {
-		NetScript inst = NetScript.instances[rpc.sceneId];
-		inst.RecieveRpc(rpc);
+	static bool IsConnectionOk (int i) {
+		string address;
+		int port;
+		UnityEngine.Networking.Types.NetworkID netId;
+		UnityEngine.Networking.Types.NodeID nodeId;
+		byte error;
+		NetworkTransport.GetConnectionInfo(Backstab.localSocketId, i, out address, out port, out netId, out nodeId, out error);
+		return error == (byte)NetworkError.Ok;
 	}
 
 	//

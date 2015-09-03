@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 using System.Reflection;
 
@@ -13,6 +14,7 @@ public class NetScriptTest : NetScript {
 	void Init () {
 		Backstab.Init();
 		RegisterRpc(SaySomething);
+		RegisterRpc(GetServerOk);
 	}
 
 	void OnGUI () {
@@ -50,6 +52,7 @@ public class NetScriptTest : NetScript {
 
 	public void OnClientConnected () {
 		boxMessage = "Client has connected.";
+		RpcAll(GetServerOk);
 	}
 
 	//
@@ -58,5 +61,9 @@ public class NetScriptTest : NetScript {
 
 	public void SaySomething (string str) {
 		Debug.Log(str);
+	}
+
+	public void GetServerOk () {
+		boxMessage = "Got OK from server.";
 	}
 }
