@@ -10,7 +10,7 @@ public class NetScript : MonoBehaviour {
 	public static int currentId = 0;
 	public static List<NetScript> instances = new List<NetScript>();
 
-	public static float checkViewIdInterval = 5.0f;
+	public static float syncInterval = 0.1f;
 	
 	private int viewId;
 	public int ViewId { get { return viewId; } }
@@ -23,22 +23,21 @@ public class NetScript : MonoBehaviour {
 	public delegate void FloatRpc (float f);
 	public delegate void ObjectRpc (System.Object ob);
 	public delegate void Vector3Rpc (float x, float y, float z);
-	public delegate void QuaternionRpc (float w, float x, float y, float z);
 
 	void Awake () {
 		instances.Add(this);
 		viewId = currentId;
 		currentId++;
+		InvokeRepeating("OnSync", syncInterval, syncInterval);
 	}
 
 	void OnDestroy () {
 		instances.Remove(this);
 	}
 
-	public virtual void OnGotPacket (System.Object packet) { ; }
-	public virtual void OnGotMessage (System.Object message) { ; }
 	public virtual void OnConnected () { ; }
 	public virtual void OnDisconnected () { ; }
+	protected virtual void OnSync () { ; }
 
 	protected void RegisterRpc (MethodInfo method) {
 		rpcs[currentSize] = method;
@@ -46,11 +45,27 @@ public class NetScript : MonoBehaviour {
 	}
 
 	protected void RpcAll (MethodInfo method, params System.Object[] args) {
-		Backstab.RpcAll(viewId, GetMethodId(method), args);
+		RpcAllReliable(method, args);
+	}
+
+	protected void RpcAllReliable (MethodInfo method, params System.Object[] args) {
+		Backstab.RpcAllReliable(viewId, GetMethodId(method), args);
+	}
+
+	protected void RpcAllUnreliable (MethodInfo method, params System.Object[] args) {
+		Backstab.RpcAllUnreliable(viewId, GetMethodId(method), args);
 	}
 
 	protected void Rpc (MethodInfo method, int playerId, params System.Object[] args) {
-		Backstab.Rpc(viewId, GetMethodId(method), args, playerId);
+		RpcReliable(method, playerId, args);
+	}
+
+	protected void RpcReliable (MethodInfo method, int playerId, params System.Object[] args) {
+		Backstab.RpcReliable(viewId, GetMethodId(method), args, playerId);
+	}
+
+	protected void RpcUnreliable (MethodInfo method, int playerId, params System.Object[] args) {
+		Backstab.RpcUnreliable(viewId, GetMethodId(method), args, playerId);
 	}
 
 	public void RecieveRpc (RpcData rpc) {
@@ -76,7 +91,6 @@ public class NetScript : MonoBehaviour {
 	protected void RegisterRpc (FloatRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (ObjectRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (Vector3Rpc function) { RegisterRpc(function.Method); }
-	protected void RegisterRpc (QuaternionRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (System.Action function) { RegisterRpc(function.Method); }
 
 	protected void Rpc (StringRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
@@ -84,15 +98,20 @@ public class NetScript : MonoBehaviour {
 	protected void Rpc (FloatRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (ObjectRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (Vector3Rpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
-	protected void Rpc (QuaternionRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (System.Action function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
-	
+
 	protected void RpcAll (StringRpc function, params System.Object[] args) { RpcAll(function.Method); }
 	protected void RpcAll (IntRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
 	protected void RpcAll (FloatRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
 	protected void RpcAll (ObjectRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
 	protected void RpcAll (Vector3Rpc function, params System.Object[] args) { RpcAll(function.Method, args); }
-	protected void RpcAll (QuaternionRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
 	protected void RpcAll (System.Action function, params System.Object[] args) { RpcAll(function.Method, args); }
+
+	protected void Sync (StringRpc function, params System.Object[] args) { RpcAllUnreliable(function.Method, args); }
+	protected void Sync (IntRpc function, params System.Object[] args) { RpcAllUnreliable(function.Method, args); }
+	protected void Sync (FloatRpc function, params System.Object[] args) { RpcAllUnreliable(function.Method, args); }
+	protected void Sync (ObjectRpc function, params System.Object[] args) { RpcAllUnreliable(function.Method, args); }
+	protected void Sync (Vector3Rpc function, params System.Object[] args) { RpcAllUnreliable(function.Method, args); }
+	protected void Sync (System.Action function, params System.Object[] args) { RpcAllUnreliable(function.Method, args); }
 
 }

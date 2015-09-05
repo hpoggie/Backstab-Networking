@@ -36,10 +36,6 @@ public class NetScriptTest : NetScript {
 		//Rpc(SaySomething, Backstab.serverConnectionId, "Hello World");
 	}
 
-	public override void OnGotMessage (System.Object message) {
-		boxMessage = message as string;
-	}
-
 	public void OnClientConnected () {
 		boxMessage = "Client has connected.";
 		RpcAll(GetServerOk);

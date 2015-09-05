@@ -43,6 +43,7 @@ public class Backstab : MonoBehaviour {
 
 	public static int port = 8888;
 	public static int maxConnections = 10;
+	public static uint packetSize = 1024;
 
 	public static int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
 	public static int LocalSocketId { get { return localSocketId; } }
@@ -101,11 +102,19 @@ public class Backstab : MonoBehaviour {
 	//Sending
 	//
 
-	public static void RpcAll (int viewId, byte methodId, System.Object[] args) {
+	public static void RpcAllReliable (int viewId, byte methodId, System.Object[] args) {
+		RpcAll(viewId, methodId, reliableChannelId, args);
+	}
+
+	public static void RpcAllUnreliable (int viewId, byte methodId, System.Object[] args) {
+		RpcAll(viewId, methodId, unreliableChannelId, args);
+	}
+
+	public static void RpcAll (int viewId, byte methodId, int channelId, System.Object[] args) {
 		if (isServer) {
 			for (int i = 0; i < Backstab.clientConnectionIds.Length; i++) {
 				if (IsConnectionOk(i)) {
-					Rpc(viewId, methodId, args, i);
+					Rpc(viewId, methodId, args, channelId, i);
 				}
 			}
 		} else {
@@ -113,21 +122,21 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	public static void Rpc (int viewId, byte methodId, System.Object[] args, int connectionId) {
-		SendUnreliable(new RpcData(viewId, methodId, args), connectionId);
+	public static void RpcReliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
+		Rpc(viewId, methodId, args, reliableChannelId, connectionId);
 	}
 
-	public static void SendReliable (System.Object packet, int targetId) {
-		Send(packet, reliableChannelId, targetId);
+	public static void RpcUnreliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
+		Rpc(viewId, methodId, args, unreliableChannelId, connectionId);
 	}
-	
-	public static void SendUnreliable (System.Object packet, int targetId) {
-		Send(packet, unreliableChannelId, targetId);
+
+	public static void Rpc (int viewId, byte methodId, System.Object[] args, int channelId, int connectionId) {
+		Send(new RpcData(viewId, methodId, args), channelId, connectionId);
 	}
-	
+
 	public static void Send (System.Object packet, int channelId, int targetId) {
 		byte error;
-		byte[] buffer = new byte[1024];
+		byte[] buffer = new byte[packetSize];
 		Stream stream = new MemoryStream(buffer);
 		BinaryFormatter formatter = new BinaryFormatter();
 		formatter.Serialize(stream, packet);
@@ -151,10 +160,6 @@ public class Backstab : MonoBehaviour {
 		ConnectionConfig config = new ConnectionConfig();
 		reliableChannelId = config.AddChannel(QosType.Reliable);
 		unreliableChannelId = config.AddChannel(QosType.Unreliable);
-		//config.PacketSize = 4096;
-		//config.FragmentSize = 1024;
-		//config.MaxSentMessageQueueSize = 100;
-		config.IsAcksLong = true;
 		ConnectionConfig.Validate(config);
 
 		clientConnectionIds = new int[maxConnections];
@@ -173,7 +178,7 @@ public class Backstab : MonoBehaviour {
 		int recSocketId;
 		int recConnectionId;
 		int recChannelId;
-		byte[] buffer = new byte[1024];
+		byte[] buffer = new byte[packetSize];
 		int recievedSize;
 		byte error;
 		NetworkEventType rEvent =  NetworkTransport.Receive(out recSocketId, out recConnectionId, out recChannelId, buffer, buffer.Length, out recievedSize, out error);
