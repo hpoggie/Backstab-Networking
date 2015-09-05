@@ -7,28 +7,19 @@ public class NetScriptTest : NetScript {
 	public string testString = "This is a test.";
 	public string boxMessage = "";
 	
-	void SetSocketId (int i) {
-		Backstab.localSocketId = i;
-	}
-
-	void Init () {
+	void Start () {
 		Backstab.Init();
-		RegisterRpc(SaySomething);
+		//RegisterRpc(SaySomething);
 		RegisterRpc(GetServerOk);
 	}
 
 	void OnGUI () {
 		if (Backstab.IsActive) {
-			GUILayout.Box("Your socket is " +Backstab.LocalSocketId);
+			GUILayout.Box("Your socket ID is " +Backstab.LocalSocketId);
 			if (Backstab.IsServer) {
 				GUILayout.Box("Server active.");
 			}
 			GUILayout.Box(boxMessage);
-		} else {
-			SetSocketId(int.Parse(GUILayout.TextField(Backstab.localSocketId.ToString())));
-			if (GUILayout.Button("Start")) {
-				Init();
-			}
 		}
 	}
 
@@ -43,7 +34,7 @@ public class NetScriptTest : NetScript {
 	public override void OnConnected () {
 		boxMessage = "Connected to server.";
 		//Backstab.Send(new Message(ViewId, testString));
-		Rpc(SaySomething, Backstab.serverConnectionId, "Hello World");
+		//Rpc(SaySomething, Backstab.serverConnectionId, "Hello World");
 	}
 
 	public override void OnGotMessage (System.Object message) {
@@ -58,11 +49,11 @@ public class NetScriptTest : NetScript {
 	//
 	//Rpcs
 	//
-
+	/*
 	public void SaySomething (string str) {
 		Debug.Log(str);
 	}
-
+	*/
 	public void GetServerOk () {
 		boxMessage = "Got OK from server.";
 	}

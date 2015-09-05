@@ -22,14 +22,12 @@ public class NetScript : MonoBehaviour {
 	public delegate void IntRpc (int i);
 	public delegate void FloatRpc (float f);
 	public delegate void ObjectRpc (System.Object ob);
+	public delegate void Vector3Rpc (float x, float y, float z);
 
 	void Awake () {
 		instances.Add(this);
 		viewId = currentId;
 		currentId++;
-
-		//RegisterRpc(VerifyViewId);
-		//InvokeRepeating("CheckViewId", 0.0f, checkViewIdInterval);
 	}
 
 	void OnDestroy () {
@@ -40,26 +38,6 @@ public class NetScript : MonoBehaviour {
 	public virtual void OnGotMessage (System.Object message) { ; }
 	public virtual void OnConnected () { ; }
 	public virtual void OnDisconnected () { ; }
-
-	//
-	//ID Checking
-	//
-	/*
-	void CheckViewId () {
-		if (Backstab.IsActive) {
-			Rpc(VerifyViewId, viewId);
-		}
-	}
-
-	void VerifyViewId (int id) {
-		if (viewId != id) {
-			Debug.LogError("Inconsistent viewIds.");
-		}
-	}
-	*/
-	//
-	//Rpcs
-	//
 
 	protected void RegisterRpc (MethodInfo method) {
 		rpcs[currentSize] = method;
@@ -75,10 +53,15 @@ public class NetScript : MonoBehaviour {
 	}
 
 	public void RecieveRpc (RpcData rpc) {
-		rpcs[rpc.methodId].Invoke(this, rpc.args);
+		if (rpc.args.Length == 0) {
+			rpcs[rpc.methodId].Invoke(this, null);
+		} else {
+			//Debug.Log(rpc.args.Length);
+			rpcs[rpc.methodId].Invoke(this, rpc.args);
+		}
 	}
 
-	byte GetMethodId (MethodInfo method) {
+	private byte GetMethodId (MethodInfo method) {
 		for (byte i = 0; i < currentSize; i++) {
 			if (rpcs[i] == method) {
 				return i;
@@ -96,18 +79,21 @@ public class NetScript : MonoBehaviour {
 	protected void RegisterRpc (IntRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (FloatRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (ObjectRpc function) { RegisterRpc(function.Method); }
+	protected void RegisterRpc (Vector3Rpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (System.Action function) { RegisterRpc(function.Method); }
 
 	protected void Rpc (StringRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (IntRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (FloatRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (ObjectRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
+	protected void Rpc (Vector3Rpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (System.Action function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	
 	protected void RpcAll (StringRpc function, params System.Object[] args) { RpcAll(function.Method); }
-	protected void RpcAll (IntRpc function, params System.Object[] args) { RpcAll(function.Method); }
-	protected void RpcAll (FloatRpc function, params System.Object[] args) { RpcAll(function.Method); }
-	protected void RpcAll (ObjectRpc function, params System.Object[] args) { RpcAll(function.Method); }
-	protected void RpcAll (System.Action function, params System.Object[] args) { RpcAll(function.Method); }
+	protected void RpcAll (IntRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
+	protected void RpcAll (FloatRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
+	protected void RpcAll (ObjectRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
+	protected void RpcAll (Vector3Rpc function, params System.Object[] args) { RpcAll(function.Method, args); }
+	protected void RpcAll (System.Action function, params System.Object[] args) { RpcAll(function.Method, args); }
 
 }

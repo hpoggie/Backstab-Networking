@@ -4,9 +4,9 @@
  * Before doing anything, call Backstab.Init().
  * To start a server, call Backstab.StartServer().
  * To connect to a server, call Backstab.Connect(someIp), where someIp is the ip address of the server.
- * To send a message, call Backstab.Send(myMessage), where myMessage is the message you want to send.
  * To quit, call Backstab.Quit().
  * 
+ * Backstab uses UDP, not Websocket.
  */
 
 using UnityEngine;
@@ -16,17 +16,6 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Reflection;
-
-[System.Serializable]
-public class Message {
-	public int sceneId;
-	public System.Object message;
-
-	public Message (int sceneId, System.Object message) {
-		this.sceneId = sceneId;
-		this.message = message;
-	}
-}
 
 [System.Serializable]
 public class RpcData {
@@ -106,21 +95,21 @@ public class Backstab : MonoBehaviour {
 	//
 
 	public static void RpcAll (int viewId, byte methodId, System.Object[] args) {
-		for (int i = 0; i < Backstab.clientConnectionIds.Length; i++) {
-			if (IsConnectionOk(i)) {
-				Rpc(viewId, methodId, args, i);
+		if (isServer) {
+			for (int i = 0; i < Backstab.clientConnectionIds.Length; i++) {
+				if (IsConnectionOk(i)) {
+					Rpc(viewId, methodId, args, i);
+				}
 			}
+		} else {
+			Debug.LogError("Not the server. Can't send to clients.");
 		}
 	}
 
 	public static void Rpc (int viewId, byte methodId, System.Object[] args, int connectionId) {
 		SendReliable(new RpcData(viewId, methodId, args), connectionId);
 	}
-	/*
-	public static void Send (Message message) {
-		SendReliable(message);
-	}
-	*/
+
 	public static void SendReliable (System.Object packet, int targetId) {
 		Send(packet, reliableChannelId, targetId);
 	}
@@ -142,14 +131,6 @@ public class Backstab : MonoBehaviour {
 	//Recieving
 	//
 
-	static void GetMessage (Message message) {
-		foreach (NetScript inst in NetScript.instances) {
-			if (inst.ViewId == message.sceneId) {
-				inst.OnGotMessage(message.message);
-			}
-		}
-	}
-	
 	static void GetRpc (RpcData rpc) {
 		NetScript inst = NetScript.instances[rpc.sceneId];
 		inst.RecieveRpc(rpc);
@@ -208,9 +189,7 @@ public class Backstab : MonoBehaviour {
 				BinaryFormatter formatter = new BinaryFormatter();
 				packet = formatter.Deserialize(stream);
 				
-				if (packet is Message) {
-					GetMessage(packet as Message);
-				} else if (packet is RpcData) {
+				if (packet is RpcData) {
 					GetRpc(packet as RpcData);
 				}
 				break;
