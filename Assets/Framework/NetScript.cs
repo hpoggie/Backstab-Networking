@@ -23,6 +23,7 @@ public class NetScript : MonoBehaviour {
 	public delegate void FloatRpc (float f);
 	public delegate void ObjectRpc (System.Object ob);
 	public delegate void Vector3Rpc (float x, float y, float z);
+	public delegate void QuaternionRpc (float w, float x, float y, float z);
 
 	void Awake () {
 		instances.Add(this);
@@ -53,12 +54,7 @@ public class NetScript : MonoBehaviour {
 	}
 
 	public void RecieveRpc (RpcData rpc) {
-		if (rpc.args.Length == 0) {
-			rpcs[rpc.methodId].Invoke(this, null);
-		} else {
-			//Debug.Log(rpc.args.Length);
-			rpcs[rpc.methodId].Invoke(this, rpc.args);
-		}
+		rpcs[rpc.methodId].Invoke(this, rpc.args);
 	}
 
 	private byte GetMethodId (MethodInfo method) {
@@ -80,6 +76,7 @@ public class NetScript : MonoBehaviour {
 	protected void RegisterRpc (FloatRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (ObjectRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (Vector3Rpc function) { RegisterRpc(function.Method); }
+	protected void RegisterRpc (QuaternionRpc function) { RegisterRpc(function.Method); }
 	protected void RegisterRpc (System.Action function) { RegisterRpc(function.Method); }
 
 	protected void Rpc (StringRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
@@ -87,6 +84,7 @@ public class NetScript : MonoBehaviour {
 	protected void Rpc (FloatRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (ObjectRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (Vector3Rpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
+	protected void Rpc (QuaternionRpc function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	protected void Rpc (System.Action function, int playerId, params System.Object[] args) { Rpc(function.Method, playerId, args); }
 	
 	protected void RpcAll (StringRpc function, params System.Object[] args) { RpcAll(function.Method); }
@@ -94,6 +92,7 @@ public class NetScript : MonoBehaviour {
 	protected void RpcAll (FloatRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
 	protected void RpcAll (ObjectRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
 	protected void RpcAll (Vector3Rpc function, params System.Object[] args) { RpcAll(function.Method, args); }
+	protected void RpcAll (QuaternionRpc function, params System.Object[] args) { RpcAll(function.Method, args); }
 	protected void RpcAll (System.Action function, params System.Object[] args) { RpcAll(function.Method, args); }
 
 }

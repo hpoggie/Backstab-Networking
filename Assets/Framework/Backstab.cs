@@ -1,12 +1,19 @@
 ﻿/*
  * How to use
  * 
+ * DO NOT ASSIGN THIS SCRIPT TO A GAMEOBJECT. CALL THE STATIC FUNCTIONS.
  * Before doing anything, call Backstab.Init().
  * To start a server, call Backstab.StartServer().
  * To connect to a server, call Backstab.Connect(someIp), where someIp is the ip address of the server.
  * To quit, call Backstab.Quit().
  * 
+ * Backstab has no SyncVars. Everything must be done from RPCs.
+ * RPCs must be done from NetScript components; all your scripts with RPCs must inherit from NetScript.
+ * 
  * Backstab uses UDP, not Websocket.
+ * 
+ * Backstab contains Heavy Wizardry and a little Black Magic. Modify this code at your own risk.
+ * If you do choose to modify it, do not expect the docs to be helpful.
  */
 
 using UnityEngine;
@@ -78,7 +85,7 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	//Warning: HEAVY WIZARDRY. I do not know what all of these arguments do.
+	//Warning: Minor Black Magic. I do not know what all of these arguments do.
 	public static void Connect (string ip) {
 		OpenSocket(0);
 		byte error;
@@ -107,7 +114,7 @@ public class Backstab : MonoBehaviour {
 	}
 
 	public static void Rpc (int viewId, byte methodId, System.Object[] args, int connectionId) {
-		SendReliable(new RpcData(viewId, methodId, args), connectionId);
+		SendUnreliable(new RpcData(viewId, methodId, args), connectionId);
 	}
 
 	public static void SendReliable (System.Object packet, int targetId) {
@@ -144,12 +151,15 @@ public class Backstab : MonoBehaviour {
 		ConnectionConfig config = new ConnectionConfig();
 		reliableChannelId = config.AddChannel(QosType.Reliable);
 		unreliableChannelId = config.AddChannel(QosType.Unreliable);
+		//config.PacketSize = 4096;
+		//config.FragmentSize = 1024;
+		//config.MaxSentMessageQueueSize = 100;
+		config.IsAcksLong = true;
 		ConnectionConfig.Validate(config);
 
 		clientConnectionIds = new int[maxConnections];
 		HostTopology topology = new HostTopology(config, maxConnections);
 		localSocketId = NetworkTransport.AddHost(topology, socketPort, null);
-		Debug.Log("Opened socket " +localSocketId);
 	}
 
 	private static void MakeInstance () {
