@@ -50,13 +50,15 @@ public class Backstab : MonoBehaviour {
 	public static int serverConnectionId;
 	public static int[] clientConnectionIds;
 	public static int numConnections = 0;
-	public static bool IsConnected { get { return isServer; }  }
+	public static bool IsConnected { get { return isServer || isClient; }  }
 	private static int connectionId; //Used to tell message recievers which connection sent the message
 	private static int reliableChannelId;
 	private static int unreliableChannelId;
 
 	private static bool isServer;
 	public static bool IsServer { get { return isServer; } }
+	private static bool isClient;
+	public static bool IsClient { get { return isClient; } }
 
 	//
 	//Basic functions
@@ -89,6 +91,7 @@ public class Backstab : MonoBehaviour {
 	//Warning: Minor Black Magic. I do not know what all of these arguments do.
 	public static void Connect (string ip) {
 		OpenSocket(0);
+		isClient = true;
 		byte error;
 		connectionId = NetworkTransport.Connect(localSocketId, ip, port, 0, out error);
 	}
@@ -96,6 +99,7 @@ public class Backstab : MonoBehaviour {
 	public static void Disconnect () {
 		byte error;
 		NetworkTransport.Disconnect(localSocketId, connectionId, out error);
+		isClient = false;
 	}
 
 	//

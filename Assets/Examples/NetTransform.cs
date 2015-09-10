@@ -2,16 +2,17 @@
 using System.Collections;
 
 //
-//A synchronized transform without prediction.
+//A synchronized transform without prediction. A proof-of-concept.
 //
 
 public class NetTransform : NetScript {
 	void Start () {
-		RegisterRpc(SyncPosition);
-		RegisterRpc(SyncRotation);
-		RegisterRpc(SyncScale);
+		//RegisterRpc(SyncPosition);
+		//RegisterRpc(SyncRotation);
+		//RegisterRpc(SyncScale);
+		;
 	}
-	
+	/*
 	protected override void OnSync () {
 		if (Backstab.IsServer) {
 			Sync(SyncPosition, transform.position.x, transform.position.y, transform.position.z);
@@ -19,7 +20,7 @@ public class NetTransform : NetScript {
 			Sync(SyncScale, transform.localScale.x, transform.localScale.y, transform.localScale.z);
 		}
 	}
-
+	*/
 	public void SyncPosition (float x, float y, float z) { transform.position = new Vector3(x, y, z); }
 	public void SyncRotation (float x, float y, float z) { transform.rotation = Quaternion.Euler(x, y, z); }
 	public void SyncScale (float x, float y, float z) { transform.localScale = new Vector3(x, y, z); }

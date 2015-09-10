@@ -38,7 +38,7 @@ public class NetScriptTest : NetScript {
 
 	public void OnClientConnected () {
 		boxMessage = "Client has connected.";
-		RpcAll(GetServerOk);
+		RpcAllReliable("GetServerOk");
 	}
 
 	//
