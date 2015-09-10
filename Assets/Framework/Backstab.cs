@@ -5,6 +5,7 @@
  * Before doing anything, call Backstab.Init().
  * To start a server, call Backstab.StartServer().
  * To connect to a server, call Backstab.Connect(someIp), where someIp is the ip address of the server.
+ * To disconnect or stop the server, call Backstab.Disconnect().
  * To quit, call Backstab.Quit().
  * 
  * Backstab has no SyncVars. Everything must be done from RPCs.
@@ -18,19 +19,16 @@
 
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Reflection;
 
 [System.Serializable]
 public class RpcData {
 	public int sceneId;
-	public int methodId;
+	public byte methodId;
 	public System.Object[] args;
 
-	public RpcData (int sceneId, int methodId, System.Object[] args) {
+	public RpcData (int sceneId, byte methodId, System.Object[] args) {
 		this.sceneId = sceneId;
 		this.methodId = methodId;
 		this.args = args;
@@ -98,8 +96,14 @@ public class Backstab : MonoBehaviour {
 
 	public static void Disconnect () {
 		byte error;
-		NetworkTransport.Disconnect(localSocketId, connectionId, out error);
-		isClient = false;
+		if (isServer) {
+			NetworkTransport.RemoveHost(localSocketId);
+			isServer = false;
+		}
+		if (isClient) {
+			NetworkTransport.Disconnect(localSocketId, serverConnectionId, out error);
+			isClient = false;
+		}
 	}
 
 	//
@@ -140,11 +144,14 @@ public class Backstab : MonoBehaviour {
 
 	public static void Send (System.Object packet, int channelId, int targetId) {
 		byte error;
-		byte[] buffer = new byte[packetSize];
-		Stream stream = new MemoryStream(buffer);
-		BinaryFormatter formatter = new BinaryFormatter();
-		formatter.Serialize(stream, packet);
+		byte[] buffer = Serialize(packet);
 		NetworkTransport.Send(localSocketId, targetId, channelId, buffer, buffer.Length, out error);
+	}
+
+	private static byte[] Serialize (System.Object packet) {
+		byte[] buffer = new byte[packetSize];
+		new BinaryFormatter().Serialize(new MemoryStream(buffer), packet);
+		return buffer;
 	}
 
 	//
@@ -191,15 +198,16 @@ public class Backstab : MonoBehaviour {
 			case NetworkEventType.Nothing:
 				break;
 			case NetworkEventType.ConnectEvent:
-				if (isServer) {
-					FindObjectOfType<NetScriptTest>().OnClientConnected();
-					
+				if (isServer) {					
 					clientConnectionIds[numConnections] = recSocketId;
 					numConnections++;
+					foreach (NetScript inst in NetScript.instances) {
+						inst.OnClientConnected();
+					}
 				} else {
 					serverConnectionId = recConnectionId;
 					foreach (NetScript inst in NetScript.instances) {
-						inst.OnConnected();
+						inst.OnConnectedToServer();
 					}
 				}
 				break;
@@ -213,8 +221,17 @@ public class Backstab : MonoBehaviour {
 				}
 				break;
 			case NetworkEventType.DisconnectEvent:
-				foreach (NetScript inst in NetScript.instances) {
-					inst.OnDisconnected();
+				if (isServer) {
+					foreach (NetScript inst in NetScript.instances) {
+						inst.OnClientDisconnected();
+					}
+					numConnections--;
+				} else {
+					foreach (NetScript inst in NetScript.instances) {
+						inst.OnDisconnectedFromServer();
+					}
+					NetworkTransport.RemoveHost(localSocketId);
+					isClient = false;
 				}
 				break;
 		}

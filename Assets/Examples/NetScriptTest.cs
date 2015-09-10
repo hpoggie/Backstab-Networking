@@ -18,6 +18,10 @@ public class NetScriptTest : NetScript {
 			GUILayout.Box("Your socket ID is " +Backstab.LocalSocketId);
 			if (Backstab.IsServer) {
 				GUILayout.Box("Server active.");
+			} else if (Backstab.IsClient) {
+				GUILayout.Box("Connected to server.");
+			} else {
+				GUILayout.Box("Not connected.");
 			}
 			GUILayout.Box(boxMessage);
 		}
@@ -31,12 +35,16 @@ public class NetScriptTest : NetScript {
 		Backstab.Connect("127.0.0.1");
 	}
 
-	public override void OnConnected () {
+	public void Disconnect () {
+		Backstab.Disconnect();
+	}
+
+	public override void OnConnectedToServer () {
 		boxMessage = "Connected to server.";
 		//Rpc(SaySomething, Backstab.serverConnectionId, "Hello World");
 	}
 
-	public void OnClientConnected () {
+	public override void OnClientConnected () {
 		boxMessage = "Client has connected.";
 		RpcAllReliable("GetServerOk");
 	}

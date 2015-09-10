@@ -29,8 +29,10 @@ public class NetScript : MonoBehaviour {
 		instances.Remove(this);
 	}
 
-	public virtual void OnConnected () { ; }
-	public virtual void OnDisconnected () { ; }
+	public virtual void OnConnectedToServer () { ; }
+	public virtual void OnClientConnected () { ; }
+	public virtual void OnDisconnectedFromServer () { ; }
+	public virtual void OnClientDisconnected () { ; }
 	protected virtual void OnSync () { ; }
 
 	//
@@ -96,16 +98,6 @@ public class NetScript : MonoBehaviour {
 
 	public void RecieveRpc (RpcData rpc) {
 		rpcs[rpc.methodId].Invoke(this, rpc.args);
-	}
-
-	private byte GetMethodId (MethodInfo method) {
-		for (byte i = 0; i < currentSize; i++) {
-			if (rpcs[i] == method) {
-				return i;
-			}
-		}
-		Debug.LogError("Method not found. Defaulting to first method in array.");
-		return 0;
 	}
 
 	public byte GetMethodIndex (string s) {
