@@ -11,10 +11,10 @@ using System.Collections;
 public class NetRigidbody : NetScript {
 
 	void Start () {
-		RegisterRpc(SyncPosition);
-		RegisterRpc(SyncRotation);
-		RegisterRpc(SyncVelocity);
-		RegisterRpc(SyncAngularVelocity);
+		RegisterRpc("SyncPosition");
+		RegisterRpc("SyncRotation");
+		RegisterRpc("SyncVelocity");
+		RegisterRpc("SyncAngularVelocity");
 	}
 	
 	protected override void OnSync () {

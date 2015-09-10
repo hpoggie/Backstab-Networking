@@ -10,7 +10,7 @@ public class NetScriptTest : NetScript {
 	void Start () {
 		Backstab.Init();
 		//RegisterRpc(SaySomething);
-		RegisterRpc(GetServerOk);
+		RegisterRpc("GetServerOk");
 	}
 
 	void OnGUI () {
