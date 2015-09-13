@@ -49,7 +49,6 @@ public class Backstab : MonoBehaviour {
 	public static int[] clientConnectionIds;
 	public static int numConnections = 0;
 	public static bool IsConnected { get { return isServer || isClient; }  }
-	private static int connectionId; //Used to tell message recievers which connection sent the message
 	private static int reliableChannelId;
 	private static int unreliableChannelId;
 
@@ -91,7 +90,7 @@ public class Backstab : MonoBehaviour {
 		OpenSocket(0);
 		isClient = true;
 		byte error;
-		connectionId = NetworkTransport.Connect(localSocketId, ip, port, 0, out error);
+		NetworkTransport.Connect(localSocketId, ip, port, 0, out error);
 	}
 
 	public static void Disconnect () {
@@ -104,6 +103,12 @@ public class Backstab : MonoBehaviour {
 			NetworkTransport.Disconnect(localSocketId, serverConnectionId, out error);
 			isClient = false;
 		}
+	}
+
+	public static void Kick (int index) {
+		byte error;
+		//NetworkTransport.Disconnect(localSocketId, clientConnectionIds[index], out error);
+		NetworkTransport.Disconnect(localSocketId, index + 1, out error);
 	}
 
 	//

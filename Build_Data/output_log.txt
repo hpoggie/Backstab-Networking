@@ -2,9 +2,9 @@ Mono path[0] = 'C:/Users/Henry/Documents/Backstab Networking/Build_Data/Managed'
 Mono path[1] = 'C:/Users/Henry/Documents/Backstab Networking/Build_Data/Mono'
 Mono config path = 'C:/Users/Henry/Documents/Backstab Networking/Build_Data/Mono/etc'
 PlayerConnection initialized from C:/Users/Henry/Documents/Backstab Networking/Build_Data (debug = 0)
-PlayerConnection initialized network socket : 0.0.0.0 55153
-Multi-casting "[IP] 10.0.0.149 [Port] 55153 [Flags] 2 [Guid] 4229070665 [EditorId] 2214056537 [Version] 1048832 [Id] WindowsPlayer(Polyphemus) [Debug] 0" to [225.0.0.222:54997]...
-PlayerConnection already initialized - listening to [10.0.0.149:55153]
+PlayerConnection initialized network socket : 0.0.0.0 55448
+Multi-casting "[IP] 10.0.0.149 [Port] 55448 [Flags] 2 [Guid] 1479158004 [EditorId] 951927969 [Version] 1048832 [Id] WindowsPlayer(Polyphemus) [Debug] 0" to [225.0.0.222:54997]...
+PlayerConnection already initialized - listening to [10.0.0.149:55448]
 Initialize engine version: 5.1.2f1 (afd2369b692a)
 GfxDevice: creating device client; threaded=1
 Direct3D:
@@ -23,7 +23,7 @@ Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Manag
 Loading C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
 Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
 Loading C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
-- Completed reload, in  0.161 seconds
+- Completed reload, in  0.199 seconds
 desktop: 1600x900 60Hz; virtual: 1600x900 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
@@ -31,5 +31,5 @@ desktop: 1600x900 60Hz; virtual: 1600x900 at 0,0
 Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\System.dll (this message is harmless)
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 8d4 -> priority: 1 
-  Thread -> id: 10f0 -> priority: 1 
+  Thread -> id: 320 -> priority: 1 
+  Thread -> id: fd4 -> priority: 1 

@@ -39,6 +39,10 @@ public class NetScriptTest : NetScript {
 		Backstab.Disconnect();
 	}
 
+	public void Kick () {
+		Backstab.Kick(0);
+	}
+
 	public override void OnConnectedToServer () {
 		boxMessage = "Connected to server.";
 		//Rpc(SaySomething, Backstab.serverConnectionId, "Hello World");
