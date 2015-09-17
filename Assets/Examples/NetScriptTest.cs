@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.Networking;
 using System.Collections;
-using System.Reflection;
 
 public class NetScriptTest : NetScript {
 	public string testString = "This is a test.";
@@ -9,7 +7,6 @@ public class NetScriptTest : NetScript {
 	
 	void Start () {
 		Backstab.Init();
-		//RegisterRpc(SaySomething);
 		RegisterRpc("GetServerOk");
 	}
 
@@ -19,11 +16,18 @@ public class NetScriptTest : NetScript {
 			if (Backstab.IsServer) {
 				GUILayout.Box("Server active.");
 			} else if (Backstab.IsClient) {
+				GUILayout.Box("Client active.");
+			} else if (Backstab.IsClient && Backstab.IsConnected) {
 				GUILayout.Box("Connected to server.");
 			} else {
-				GUILayout.Box("Not connected.");
+				GUILayout.Box("Not server or client.");
 			}
 			GUILayout.Box(boxMessage);
+			foreach (ConnectionData b in Backstab.broadcasters) {
+				if (GUILayout.Button(b.ToString())) {
+					Backstab.Connect(b.address, b.port);
+				}
+			}
 		}
 	}
 
@@ -31,8 +35,17 @@ public class NetScriptTest : NetScript {
 		Backstab.StartServer();
 	}
 
-	public void Connect () {
-		Backstab.Connect("127.0.0.1");
+	public void StopServer () {
+		Backstab.StopServer();
+	}
+
+	public void StartClient () {
+		Backstab.StartClient();
+	}
+
+	public IEnumerator WaitStopServer () {
+		yield return new WaitForSeconds(0);
+		StopServer();
 	}
 
 	public void Disconnect () {
@@ -45,22 +58,19 @@ public class NetScriptTest : NetScript {
 
 	public override void OnConnectedToServer () {
 		boxMessage = "Connected to server.";
-		//Rpc(SaySomething, Backstab.serverConnectionId, "Hello World");
 	}
 
 	public override void OnClientConnected () {
 		boxMessage = "Client has connected.";
-		RpcAllReliable("GetServerOk");
+		RpcClientsReliable("GetServerOk");
 	}
 
-	//
-	//Rpcs
-	//
-	/*
-	public void SaySomething (string str) {
-		Debug.Log(str);
+	public override void OnGotBroadcast () {
+		boxMessage = "Got broadcast.";
 	}
-	*/
+	
+	//Rpcs
+
 	public void GetServerOk () {
 		boxMessage = "Got OK from server.";
 	}

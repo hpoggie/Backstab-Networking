@@ -19,10 +19,10 @@ public class NetRigidbody : NetScript {
 	
 	protected override void OnSync () {
 		if (Backstab.IsServer) {
-			RpcAllUnreliable("SyncPosition", transform.position.x, transform.position.y, transform.position.z);
-			RpcAllUnreliable("SyncRotation", transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
-			RpcAllUnreliable("SyncVelocity", GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, GetComponent<Rigidbody>().velocity.z);
-			RpcAllUnreliable("SyncAngularVelocity", GetComponent<Rigidbody>().angularVelocity.x, GetComponent<Rigidbody>().angularVelocity.y, GetComponent<Rigidbody>().angularVelocity.z);
+			RpcClientsUnreliable("SyncPosition", transform.position.x, transform.position.y, transform.position.z);
+			RpcClientsUnreliable("SyncRotation", transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+			RpcClientsUnreliable("SyncVelocity", GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, GetComponent<Rigidbody>().velocity.z);
+			RpcClientsUnreliable("SyncAngularVelocity", GetComponent<Rigidbody>().angularVelocity.x, GetComponent<Rigidbody>().angularVelocity.y, GetComponent<Rigidbody>().angularVelocity.z);
 		}
 	}
 
