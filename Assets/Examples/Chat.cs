@@ -24,8 +24,6 @@ public class Chat : NetScript {
 				}
 			}
 		}
-
-		GetTyping();
 	}
 
 	void OnGUI () {
@@ -42,23 +40,25 @@ public class Chat : NetScript {
 			GUILayout.Box(text);
 		}
 		GUILayout.EndArea();
+
+		GetTyping();
 	}
 
 	void GetTyping () {
-		foreach (char c in Input.inputString) {
-			if (c == '\n' || c == '\r') {
-				if (isTyping && text.Length > 0) {
-					Log("Local: " +text);
-					if (Backstab.IsServer) RpcClients("RemoteLog", text);
-					else if (Backstab.IsClient) RpcServer("RemoteLog", text);
-				}
-				text = "";
-				isTyping = !isTyping;
-			} else if (isTyping && c == '\b' && text.Length > 0) {
-				text = text.Substring(0, text.Length - 1);
-			} else if (isTyping) {
-				text += c;
+		if (Event.current == null || Event.current.type != EventType.KeyDown) return;
+		char c = Event.current.character;
+		if (Event.current.keyCode == KeyCode.Return) {
+			if (isTyping && text.Length > 1) {
+				Log("Local: " +text);
+				if (Backstab.IsServer) RpcClients("RemoteLog", text);
+				else if (Backstab.IsClient) RpcServer("RemoteLog", text);
 			}
+			text = "";
+			isTyping = !isTyping;
+		} else if (isTyping && Event.current.keyCode == KeyCode.Backspace && text.Length > 1) {
+			text = text.Substring(0, text.Length - 2);
+		} else if (isTyping && c != '\n') {
+			text += c;
 		}
 	}
 

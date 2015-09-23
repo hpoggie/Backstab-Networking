@@ -9,12 +9,10 @@ using System.Reflection;
 public class NetScript : MonoBehaviour {
 	public static int currentId = 0;
 	public static List<NetScript> instances = new List<NetScript>();
-
 	public static float syncInterval = 0.1f;
 	
 	private int viewId;
 	public int ViewId { get { return viewId; } }
-
 	private MethodInfo[] rpcs = new MethodInfo[256];
 	private byte currentSize = 0;
 	

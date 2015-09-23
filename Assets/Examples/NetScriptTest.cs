@@ -4,9 +4,11 @@ using System.Collections;
 public class NetScriptTest : NetScript {
 	public string testString = "This is a test.";
 	public string boxMessage = "";
-	
+	public string broadcastMessage = "LAN Server";
+
 	void Start () {
 		Backstab.Init();
+		Backstab.broadcastMessage = broadcastMessage;
 		RegisterRpc("GetServerOk");
 	}
 
@@ -63,6 +65,10 @@ public class NetScriptTest : NetScript {
 	public override void OnClientConnected () {
 		boxMessage = "Client has connected.";
 		RpcClientsReliable("GetServerOk");
+	}
+
+	public override void OnClientDisconnected () {
+		boxMessage = "Client has disconnected.";
 	}
 
 	public override void OnGotBroadcast () {

@@ -39,6 +39,7 @@ public class RpcData {
 public class ConnectionData {
 	public string address = "127.0.0.1";
 	public int port;
+	public string message;
 
 	public ConnectionData (string address, int port) {
 		this.address = address;
@@ -46,7 +47,7 @@ public class ConnectionData {
 	}
 
 	public override string ToString () {
-		return "IP: " +address + " Port: " + port;
+		return message + " IP: " +address + " Port: " + port;
 	}
 }
 
@@ -219,7 +220,13 @@ public class Backstab : MonoBehaviour {
 		new BinaryFormatter().Serialize(new MemoryStream(buffer), packet);
 		return buffer;
 	}
-	
+
+	private static object Deserialize (byte[] buffer) {
+		Stream stream = new MemoryStream(buffer);
+		BinaryFormatter formatter = new BinaryFormatter();
+		return formatter.Deserialize(stream);
+	}
+
 	//Recieving
 
 	static void GetRpc (RpcData rpc) {
@@ -272,11 +279,7 @@ public class Backstab : MonoBehaviour {
 					numConnections++;
 					break;
 				case NetworkEventType.DataEvent:
-					System.Object packet;
-					Stream stream = new MemoryStream(buffer);
-					BinaryFormatter formatter = new BinaryFormatter();
-					packet = formatter.Deserialize(stream);
-					
+					System.Object packet = Deserialize(buffer);
 					if (packet is RpcData) {
 						GetRpc(packet as RpcData);
 					}
@@ -299,7 +302,9 @@ public class Backstab : MonoBehaviour {
 					byte error;
 					NetworkTransport.GetBroadcastConnectionInfo(localSocketId, out address, out port, out error);
 					if (error != (byte)NetworkError.Ok) Debug.Log("Recieved broadcast from bad connection.");
-					TryAddBroadcaster(address, port);
+					NetworkTransport.GetBroadcastConnectionMessage(localSocketId, buffer, buffer.Length, out recievedSize, out error);
+					string message = (string)Deserialize(buffer);
+					TryAddBroadcaster(address, port, message);
 					foreach (NetScript inst in NetScript.instances) {
 						inst.OnGotBroadcast();
 					}
@@ -311,8 +316,13 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	private static void TryAddBroadcaster (string ip, int port) {
-		foreach (ConnectionData b in broadcasters) { if (b.address == ip && b.port == port) { return; } }
+	private static void TryAddBroadcaster (string ip, int port, string message) {
+		foreach (ConnectionData b in broadcasters) {
+			if (b.address == ip && b.port == port) {
+				b.message = message;
+				return;
+			}
+		}
 		broadcasters.Add(new ConnectionData(ip, port));
 	}
 
@@ -331,4 +341,9 @@ public class Backstab : MonoBehaviour {
 	void Update () {
 		Listen();
 	}
+
+	void OnApplicationQuit () {
+		Disconnect();
+	}
+
 }

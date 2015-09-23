@@ -2,9 +2,9 @@ Mono path[0] = 'C:/Users/Henry/Documents/Backstab Networking/Build_Data/Managed'
 Mono path[1] = 'C:/Users/Henry/Documents/Backstab Networking/Build_Data/Mono'
 Mono config path = 'C:/Users/Henry/Documents/Backstab Networking/Build_Data/Mono/etc'
 PlayerConnection initialized from C:/Users/Henry/Documents/Backstab Networking/Build_Data (debug = 0)
-PlayerConnection initialized network socket : 0.0.0.0 55217
-Multi-casting "[IP] 10.0.0.149 [Port] 55217 [Flags] 2 [Guid] 2250074011 [EditorId] 608301697 [Version] 1048832 [Id] WindowsPlayer(Polyphemus) [Debug] 0" to [225.0.0.222:54997]...
-PlayerConnection already initialized - listening to [10.0.0.149:55217]
+PlayerConnection initialized network socket : 0.0.0.0 55509
+Multi-casting "[IP] 10.0.0.149 [Port] 55509 [Flags] 2 [Guid] 1660740772 [EditorId] 1304104838 [Version] 1048832 [Id] WindowsPlayer(Polyphemus) [Debug] 0" to [225.0.0.222:54997]...
+PlayerConnection already initialized - listening to [10.0.0.149:55509]
 Initialize engine version: 5.1.2f1 (afd2369b692a)
 GfxDevice: creating device client; threaded=1
 Direct3D:
@@ -23,7 +23,7 @@ Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Manag
 Loading C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
 Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
 Loading C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
-- Completed reload, in  0.207 seconds
+- Completed reload, in  0.179 seconds
 desktop: 1600x900 60Hz; virtual: 1600x900 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
@@ -31,29 +31,5 @@ desktop: 1600x900 60Hz; virtual: 1600x900 at 0,0
 Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\Henry\Documents\Backstab Networking\Build_Data\Managed\System.dll (this message is harmless)
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 1f10 -> priority: 1 
-  Thread -> id: 8a4 -> priority: 1 
-Can't connect if not a client or already connected.
-UnityEngine.Debug:Internal_Log(Int32, String, Object)
-UnityEngine.Debug:LogError(Object)
-Backstab:Connect(String, Int32) (at C:\Users\Henry\Documents\Backstab Networking\Assets\Framework\Backstab.cs:144)
-NetScriptTest:OnGUI() (at C:\Users\Henry\Documents\Backstab Networking\Assets\Examples\NetScriptTest.cs:28)
- 
-(Filename: C:/Users/Henry/Documents/Backstab Networking/Assets/Framework/Backstab.cs Line: 144)
-
-Can't connect if not a client or already connected.
-UnityEngine.Debug:Internal_Log(Int32, String, Object)
-UnityEngine.Debug:LogError(Object)
-Backstab:Connect(String, Int32) (at C:\Users\Henry\Documents\Backstab Networking\Assets\Framework\Backstab.cs:144)
-NetScriptTest:OnGUI() (at C:\Users\Henry\Documents\Backstab Networking\Assets\Examples\NetScriptTest.cs:28)
- 
-(Filename: C:/Users/Henry/Documents/Backstab Networking/Assets/Framework/Backstab.cs Line: 144)
-
-Can't connect if not a client or already connected.
-UnityEngine.Debug:Internal_Log(Int32, String, Object)
-UnityEngine.Debug:LogError(Object)
-Backstab:Connect(String, Int32) (at C:\Users\Henry\Documents\Backstab Networking\Assets\Framework\Backstab.cs:144)
-NetScriptTest:OnGUI() (at C:\Users\Henry\Documents\Backstab Networking\Assets\Examples\NetScriptTest.cs:28)
- 
-(Filename: C:/Users/Henry/Documents/Backstab Networking/Assets/Framework/Backstab.cs Line: 144)
-
+  Thread -> id: 1b54 -> priority: 1 
+  Thread -> id: 12e4 -> priority: 1 
