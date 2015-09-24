@@ -50,8 +50,8 @@ public class Chat : NetScript {
 		if (Event.current.keyCode == KeyCode.Return) {
 			if (isTyping && text.Length > 1) {
 				Log("Local: " +text);
-				if (Backstab.IsServer) RpcClients("RemoteLog", text);
-				else if (Backstab.IsClient) RpcServer("RemoteLog", text);
+				if (backstab.IsServer) RpcClients("RemoteLog", text);
+				else if (backstab.IsClient) RpcServer("RemoteLog", text);
 			}
 			text = "";
 			isTyping = !isTyping;
@@ -63,7 +63,7 @@ public class Chat : NetScript {
 	}
 
 	public void RemoteLog (string s) {
-		Log("Con. " +Backstab.recConnectionId +": " +s);
+		Log("Con. " +backstab.recConnectionId +": " +s);
 	}
 
 	public void Log (string s) {

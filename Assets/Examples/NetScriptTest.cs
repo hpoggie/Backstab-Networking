@@ -5,44 +5,47 @@ public class NetScriptTest : NetScript {
 	public string testString = "This is a test.";
 	public string boxMessage = "";
 	public string broadcastMessage = "LAN Server";
-
+	
 	void Start () {
-		Backstab.Init();
-		Backstab.broadcastMessage = broadcastMessage;
+		backstab.broadcastMessage = broadcastMessage;
 		RegisterRpc("GetServerOk");
+		//These are to verify that Backstab does not reverse the order of RPCs sent on the same frame,
+		//which Unity's old networking system (from before 5.1) did.
+		RegisterRpc("FlipMessageA");
+		RegisterRpc("FlipMessageB");
 	}
 
 	void OnGUI () {
 		if (Backstab.IsActive) {
-			GUILayout.Box("Your socket ID is " +Backstab.LocalSocketId);
-			if (Backstab.IsServer) {
+			GUILayout.Box("Your socket ID is " +backstab.LocalSocketId);
+			if (backstab.IsServer) {
 				GUILayout.Box("Server active.");
-			} else if (Backstab.IsClient) {
+			} else if (backstab.IsClient) {
 				GUILayout.Box("Client active.");
-			} else if (Backstab.IsClient && Backstab.IsConnected) {
+			} else if (backstab.IsClient && backstab.IsConnected) {
 				GUILayout.Box("Connected to server.");
 			} else {
 				GUILayout.Box("Not server or client.");
 			}
 			GUILayout.Box(boxMessage);
-			foreach (ConnectionData b in Backstab.broadcasters) {
+			foreach (ConnectionData b in backstab.broadcasters) {
 				if (GUILayout.Button(b.ToString())) {
-					Backstab.Connect(b.address, b.port);
+					backstab.Connect(b.address, b.port);
 				}
 			}
 		}
 	}
 
 	public void StartServer () {
-		Backstab.StartServer();
+		backstab.StartServer();
 	}
 
 	public void StopServer () {
-		Backstab.StopServer();
+		backstab.StopServer();
 	}
 
 	public void StartClient () {
-		Backstab.StartClient();
+		backstab.StartClient();
 	}
 
 	public IEnumerator WaitStopServer () {
@@ -51,11 +54,11 @@ public class NetScriptTest : NetScript {
 	}
 
 	public void Disconnect () {
-		Backstab.Disconnect();
+		backstab.Disconnect();
 	}
 
 	public void Kick () {
-		Backstab.Kick(0);
+		backstab.Kick(0);
 	}
 
 	public override void OnConnectedToServer () {
@@ -65,6 +68,8 @@ public class NetScriptTest : NetScript {
 	public override void OnClientConnected () {
 		boxMessage = "Client has connected.";
 		RpcClientsReliable("GetServerOk");
+		RpcClientsReliable("FlipMessageA");
+		RpcClientsReliable("FlipMessageB");
 	}
 
 	public override void OnClientDisconnected () {
@@ -79,5 +84,13 @@ public class NetScriptTest : NetScript {
 
 	public void GetServerOk () {
 		boxMessage = "Got OK from server.";
+	}
+
+	public void FlipMessageA () {
+		Debug.Log("Got message A. This should be first.");
+	}
+
+	public void FlipMessageB () {
+		Debug.Log("Got message B. This should be second.");
 	}
 }

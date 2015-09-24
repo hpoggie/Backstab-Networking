@@ -52,57 +52,46 @@ public class ConnectionData {
 }
 
 public class Backstab : MonoBehaviour {
-	private static Backstab instance;
-	public static bool IsActive { get { return (instance != null); } }
+	public static List<Backstab> instances = new List<Backstab>();
+	public static bool IsActive { get { return (instances.Count > 0); } }
 
-	public static int port = 8888;
-	public static int maxConnections = 10;
-	public static int packetSize = 1024;
+	public int port = 8888;
+	public int maxConnections = 10;
+	public int packetSize = 1024;
 
-	public static int broadcastKey = 1000;
-	public static int broadcastVersion = 1;
-	public static int broadcastSubVersion = 0;
-	public static string broadcastMessage = "Hello!";
-	public static List<ConnectionData> broadcasters = new List<ConnectionData>();
+	public int broadcastKey = 1000;
+	public int broadcastVersion = 1;
+	public int broadcastSubVersion = 0;
+	public string broadcastMessage = "Hello!";
+	public List<ConnectionData> broadcasters = new List<ConnectionData>();
 
-	public static int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
-	public static int LocalSocketId { get { return localSocketId; } }
-	public static int serverConnectionId;
-	public static int[] clientConnectionIds;
-	public static int numConnections = 0;
-	private static int reliableChannelId;
-	private static int unreliableChannelId;
+	public int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
+	public int LocalSocketId { get { return localSocketId; } }
+	public int serverConnectionId;
+	public int[] clientConnectionIds;
+	public int numConnections = 0;
+	private int reliableChannelId;
+	private int unreliableChannelId;
 
-	private static bool isServer;
-	public static bool IsServer { get { return isServer; } }
-	private static bool isClient;
-	public static bool IsClient { get { return isClient; } }
-	public static bool IsConnected { get { return numConnections > 0; }  }
+	private bool isServer;
+	public bool IsServer { get { return isServer; } }
+	private bool isClient;
+	public bool IsClient { get { return isClient; } }
+	public bool IsConnected { get { return numConnections > 0; }  }
 
-	public static int recSocketId;
-	public static int recConnectionId;
-	public static int recChannelId;
-	public static int recievedSize;
-	public static byte recError;
+	public int recSocketId;
+	public int recConnectionId;
+	public int recChannelId;
+	public int recievedSize;
+	public byte recError;
 	
 	//Basic functions
 
-	public static void Init () {
-		if (instance == null) {
-			NetworkTransport.Init();
-			MakeInstance();
-		} else {
-			Debug.LogError("Backstab is already initialized.");
-		}
-	}
-
 	public static void Quit () {
-		Disconnect();
-		isServer = false;
 		NetworkTransport.Shutdown();
 	}
 
-	public static void StartServer () {
+	public void StartServer () {
 		if (!isServer && !isClient) {
 			isServer = true;
 			OpenSocket(0);
@@ -115,7 +104,7 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	public static void StartClient () {
+	public void StartClient () {
 		if (!isServer && !isClient) {
 			OpenSocket(port);
 			isClient = true;
@@ -127,7 +116,7 @@ public class Backstab : MonoBehaviour {
 	}
 
 	//Warning: Minor Black Magic. I do not know what all of these arguments do.
-	public static void Connect (string ip) {
+	public void Connect (string ip) {
 		if (isClient && !IsConnected) {
 			byte error;
 			NetworkTransport.Connect(localSocketId, ip, port, 0, out error);
@@ -137,7 +126,7 @@ public class Backstab : MonoBehaviour {
 	}
 
 	//Warning: Minor Black Magic. I do not know what all of these arguments do.
-	public static void Connect (string ip, int connectPort) {
+	public void Connect (string ip, int connectPort) {
 		if (isClient && !IsConnected) {
 			byte error;
 			NetworkTransport.Connect(localSocketId, ip, connectPort, 0, out error);
@@ -146,7 +135,7 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	public static void Disconnect () {
+	public void Disconnect () {
 		byte error;
 		if (isServer) {
 			for (int i = 0; i <= numConnections; i++) {
@@ -161,7 +150,7 @@ public class Backstab : MonoBehaviour {
 	
 	//HAAXXX!
 	//Change this when Unity fixes RemoveHost
-	public static void StopServer () {
+	public void StopServer () {
 		Disconnect();
 		NetworkTransport.Shutdown();
 		NetworkTransport.Init();
@@ -169,7 +158,7 @@ public class Backstab : MonoBehaviour {
 		isClient = false;
 	}
 
-	public static void Kick (int index) {
+	public void Kick (int index) {
 		byte error;
 		//NetworkTransport.Disconnect(localSocketId, clientConnectionIds[index], out error);
 		NetworkTransport.Disconnect(localSocketId, index + 1, out error);
@@ -177,17 +166,17 @@ public class Backstab : MonoBehaviour {
 	
 	//Sending
 
-	public static void RpcAllReliable (int viewId, byte methodId, System.Object[] args) {
+	public void RpcAllReliable (int viewId, byte methodId, System.Object[] args) {
 		RpcAll(viewId, methodId, reliableChannelId, args);
 	}
 
-	public static void RpcAllUnreliable (int viewId, byte methodId, System.Object[] args) {
+	public void RpcAllUnreliable (int viewId, byte methodId, System.Object[] args) {
 		RpcAll(viewId, methodId, unreliableChannelId, args);
 	}
 
-	public static void RpcAll (int viewId, byte methodId, int channelId, System.Object[] args) {
+	public void RpcAll (int viewId, byte methodId, int channelId, System.Object[] args) {
 		if (isServer) {
-			for (int i = 0; i < Backstab.clientConnectionIds.Length; i++) {
+			for (int i = 0; i < clientConnectionIds.Length; i++) {
 				if (IsConnectionOk(i)) {
 					Rpc(viewId, methodId, args, channelId, i);
 				}
@@ -197,25 +186,25 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	public static void RpcReliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
+	public void RpcReliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
 		Rpc(viewId, methodId, args, reliableChannelId, connectionId);
 	}
 
-	public static void RpcUnreliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
+	public void RpcUnreliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
 		Rpc(viewId, methodId, args, unreliableChannelId, connectionId);
 	}
 
-	public static void Rpc (int viewId, byte methodId, System.Object[] args, int channelId, int connectionId) {
+	public void Rpc (int viewId, byte methodId, System.Object[] args, int channelId, int connectionId) {
 		Send(new RpcData(viewId, methodId, args), channelId, connectionId);
 	}
 
-	public static void Send (System.Object packet, int channelId, int targetId) {
+	public void Send (System.Object packet, int channelId, int targetId) {
 		byte error;
 		byte[] buffer = Serialize(packet);
 		NetworkTransport.Send(localSocketId, targetId, channelId, buffer, buffer.Length, out error);
 	}
 
-	private static byte[] Serialize (System.Object packet) {
+	private byte[] Serialize (System.Object packet) {
 		byte[] buffer = new byte[packetSize];
 		new BinaryFormatter().Serialize(new MemoryStream(buffer), packet);
 		return buffer;
@@ -236,7 +225,7 @@ public class Backstab : MonoBehaviour {
 	
 	//Private functions
 
-	private static void OpenSocket (int socketPort) {
+	private void OpenSocket (int socketPort) {
 		ConnectionConfig config = new ConnectionConfig();
 		reliableChannelId = config.AddChannel(QosType.Reliable);
 		unreliableChannelId = config.AddChannel(QosType.Unreliable);
@@ -246,14 +235,15 @@ public class Backstab : MonoBehaviour {
 		HostTopology topology = new HostTopology(config, maxConnections);
 		localSocketId = NetworkTransport.AddHost(topology, socketPort, null);
 	}
-
+	/*
 	private static void MakeInstance () {
 		GameObject ob = new GameObject();
 		ob.name = "Backstab";
 		instance =  ob.AddComponent<Backstab>();
+		DontDestroyOnLoad(instance);
 	}
-
-	private static void Listen () {
+	*/
+	private void Listen () {
 		byte[] buffer = new byte[packetSize];
 		NetworkEventType rEvent = NetworkEventType.DataEvent;
 
@@ -316,7 +306,7 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	private static void TryAddBroadcaster (string ip, int port, string message) {
+	private void TryAddBroadcaster (string ip, int port, string message) {
 		foreach (ConnectionData b in broadcasters) {
 			if (b.address == ip && b.port == port) {
 				b.message = message;
@@ -326,7 +316,7 @@ public class Backstab : MonoBehaviour {
 		broadcasters.Add(new ConnectionData(ip, port));
 	}
 
-	static bool IsConnectionOk (int i) {
+	bool IsConnectionOk (int i) {
 		string address;
 		int port;
 		UnityEngine.Networking.Types.NetworkID netId;
@@ -338,8 +328,18 @@ public class Backstab : MonoBehaviour {
 	
 	//Non-static
 
+	void Awake () {
+		if (!IsActive) NetworkTransport.Init();
+		instances.Add(this);
+	}
+
 	void Update () {
 		Listen();
+	}
+
+	void OnDestroy () {
+		Disconnect();
+		isServer = false;
 	}
 
 	void OnApplicationQuit () {

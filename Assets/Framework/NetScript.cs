@@ -10,7 +10,9 @@ public class NetScript : MonoBehaviour {
 	public static int currentId = 0;
 	public static List<NetScript> instances = new List<NetScript>();
 	public static float syncInterval = 0.1f;
-	
+
+	public Backstab backstab;
+
 	private int viewId;
 	public int ViewId { get { return viewId; } }
 	private MethodInfo[] rpcs = new MethodInfo[256];
@@ -18,6 +20,7 @@ public class NetScript : MonoBehaviour {
 	
 	void Awake () {
 		instances.Add(this);
+		if (!backstab && Backstab.instances.Count > 0) backstab = Backstab.instances[0];
 		viewId = currentId;
 		currentId++;
 		InvokeRepeating("OnSync", syncInterval, syncInterval);
@@ -53,21 +56,21 @@ public class NetScript : MonoBehaviour {
 
 	protected void Rpc (string fname, int playerId, params System.Object[] args) { RpcReliable(GetMethodIndex(fname), playerId, args); }
 	protected void RpcReliable (string fname, int playerId, params System.Object[] args) { RpcReliable(GetMethodIndex(fname), playerId, args); }
-	protected void RpcReliable (byte methodId, int playerId, params System.Object[] args) { Backstab.RpcReliable(viewId, methodId, args, playerId); }
-	protected void RpcUnreliable (byte methodId, int playerId, params System.Object[] args) { Backstab.RpcUnreliable(viewId, methodId, args, playerId); }
+	protected void RpcReliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcReliable(viewId, methodId, args, playerId); }
+	protected void RpcUnreliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcUnreliable(viewId, methodId, args, playerId); }
 	
 	//RpcAll
 
 	protected void RpcClients (string fname, params System.Object[] args) { RpcClientsReliable(GetMethodIndex(fname), args); }
 	protected void RpcClientsReliable (string fname, params System.Object[] args) { RpcClientsReliable(GetMethodIndex(fname), args); }
-	protected void RpcClientsReliable (byte methodId, params System.Object[] args) { Backstab.RpcAllReliable(viewId, methodId, args); }
+	protected void RpcClientsReliable (byte methodId, params System.Object[] args) { backstab.RpcAllReliable(viewId, methodId, args); }
 	protected void RpcClientsUnreliable (string fname, params System.Object[] args) { RpcClientsUnreliable(GetMethodIndex(fname), args); }
-	protected void RpcClientsUnreliable (byte methodId, params System.Object[] args) { Backstab.RpcAllUnreliable(viewId, methodId, args); }
+	protected void RpcClientsUnreliable (byte methodId, params System.Object[] args) { backstab.RpcAllUnreliable(viewId, methodId, args); }
 	
 	//RpcServer
 
 	protected void RpcServer (string fname, params System.Object[] args) {
-		if (Backstab.IsServer) {
+		if (backstab.IsServer) {
 			Debug.LogError("Can't send to server if already server.");
 			return;
 		} 
