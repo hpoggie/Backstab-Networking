@@ -1,9 +1,8 @@
 ﻿/*
  * How to use
  * 
- * DO NOT ASSIGN THIS SCRIPT TO A GAMEOBJECT. CALL THE STATIC FUNCTIONS.
- * Before doing anything, call Backstab.Init().
- * To start a server, call Backstab.StartServer().
+ * To start a server, call StartServer().
+ * To start a client, call StartClient().
  * To connect to a server, call Backstab.Connect(someIp), where someIp is the ip address of the server.
  * To disconnect or stop the server, call Backstab.Disconnect().
  * To quit, call Backstab.Quit().
