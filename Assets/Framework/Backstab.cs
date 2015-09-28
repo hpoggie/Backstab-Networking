@@ -12,8 +12,20 @@
  * 
  * Backstab uses UDP, not Websocket.
  * 
+ * 
+ * Settings
+ *
+ * Port: the port to connect over.
+ * Max Connections: maximum number of connections we can have (only important if running a server)
+ * Packet size: the size of sent byte arrays
+ * Broadcast Key, Version, & Subversion: must be the same as broadcaster to recieve broadcasts
+ * Broadcast Message: data sent on successful broadcast
+ *
+ * NOTE
+ *
  * Backstab contains Heavy Wizardry and a little Black Magic. Modify this code at your own risk.
  * If you do choose to modify it, do not expect the docs to be helpful.
+ *
  */
 
 using UnityEngine;
@@ -64,11 +76,11 @@ public class Backstab : MonoBehaviour {
 	public string broadcastMessage = "Hello!";
 	public List<ConnectionData> broadcasters = new List<ConnectionData>();
 
-	public int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
+	private int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
 	public int LocalSocketId { get { return localSocketId; } }
-	public int serverConnectionId;
-	public int[] clientConnectionIds;
-	public int numConnections = 0;
+	private int serverConnectionId;
+	private int[] clientConnectionIds;
+	private int numConnections = 0;
 	private int reliableChannelId;
 	private int unreliableChannelId;
 
@@ -77,12 +89,12 @@ public class Backstab : MonoBehaviour {
 	private bool isClient;
 	public bool IsClient { get { return isClient; } }
 	public bool IsConnected { get { return numConnections > 0; }  }
-
-	public int recSocketId;
-	public int recConnectionId;
-	public int recChannelId;
-	public int recievedSize;
-	public byte recError;
+	
+	[ReadOnly] public int recSocketId;
+	[ReadOnly] public int recConnectionId;
+	[ReadOnly] public int recChannelId;
+	[ReadOnly] public int recievedSize;
+	[ReadOnly] public byte recError;
 	
 	//Basic functions
 
