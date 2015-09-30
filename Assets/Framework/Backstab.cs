@@ -81,6 +81,7 @@ public class Backstab : MonoBehaviour {
 	private int serverConnectionId;
 	private int[] clientConnectionIds;
 	private int numConnections = 0;
+	public int NumConnections { get { return numConnections; } }
 	private int reliableChannelId;
 	private int unreliableChannelId;
 
