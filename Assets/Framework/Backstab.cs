@@ -171,7 +171,6 @@ public class Backstab : MonoBehaviour {
 
 	public void Kick (int index) {
 		byte error;
-		//NetworkTransport.Disconnect(localSocketId, clientConnectionIds[index], out error);
 		NetworkTransport.Disconnect(localSocketId, index + 1, out error);
 	}
 	
