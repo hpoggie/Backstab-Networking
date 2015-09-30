@@ -8,10 +8,10 @@ public class BackstabGUI : NetScript {
 			GUILayout.Box("Your socket ID is " +backstab.LocalSocketId);
 			if (backstab.IsServer) {
 				GUILayout.Box("Server active.");
-			} else if (backstab.IsClient) {
-				GUILayout.Box("Client active.");
 			} else if (backstab.IsClient && backstab.IsConnected) {
 				GUILayout.Box("Connected to " + serverData.address);
+			} else if (backstab.IsClient) {
+				GUILayout.Box("Client active.");
 			} else {
 				GUILayout.Box("Not server or client.");
 			}
