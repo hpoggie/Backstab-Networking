@@ -246,14 +246,7 @@ public class Backstab : MonoBehaviour {
 		HostTopology topology = new HostTopology(config, maxConnections);
 		localSocketId = NetworkTransport.AddHost(topology, socketPort, null);
 	}
-	/*
-	private static void MakeInstance () {
-		GameObject ob = new GameObject();
-		ob.name = "Backstab";
-		instance =  ob.AddComponent<Backstab>();
-		DontDestroyOnLoad(instance);
-	}
-	*/
+
 	private void Listen () {
 		byte[] buffer = new byte[packetSize];
 		NetworkEventType rEvent = NetworkEventType.DataEvent;
