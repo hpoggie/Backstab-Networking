@@ -61,11 +61,11 @@ public class NetScriptTest : NetScript {
 		backstab.Kick(0);
 	}
 
-	public override void OnConnectedToServer () {
-		boxMessage = "Connected to server.";
+	public override void OnBackstabConnectedToServer (ConnectionData data) {
+		boxMessage = "Connected to " +data.address;
 	}
 
-	public override void OnClientConnected () {
+	public override void OnClientConnected (ConnectionData data) {
 		boxMessage = "Client has connected.";
 		RpcClientsReliable("GetServerOk");
 		RpcClientsReliable("FlipMessageA");

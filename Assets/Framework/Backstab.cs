@@ -259,15 +259,16 @@ public class Backstab : MonoBehaviour {
 				case NetworkEventType.Nothing:
 					break;
 				case NetworkEventType.ConnectEvent:
+					ConnectionData data = GetConnectionData(recConnectionId);
 					if (isServer) {					
 						clientConnectionIds[numConnections] = recSocketId;
 						foreach (NetScript inst in NetScript.instances) {
-							inst.OnClientConnected();
+							inst.OnClientConnected(data);
 						}
 					} else {
 						serverConnectionId = recConnectionId;
 						foreach (NetScript inst in NetScript.instances) {
-							inst.OnConnectedToServer();
+							inst.OnBackstabConnectedToServer(data);
 						}
 					}
 					numConnections++;
@@ -328,6 +329,20 @@ public class Backstab : MonoBehaviour {
 		byte error;
 		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out port, out netId, out nodeId, out error);
 		return error == (byte)NetworkError.Ok;
+	}
+
+	public ConnectionData GetConnectionData (int i) {
+		string address;
+		int port;
+		UnityEngine.Networking.Types.NetworkID netId;
+		UnityEngine.Networking.Types.NodeID nodeId;
+		byte error;
+		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out port, out netId, out nodeId, out error);
+		if (error == (byte)NetworkError.Ok) {
+			return new ConnectionData(address, port);
+		} else {
+			return null;
+		}
 	}
 	
 	//Non-static
