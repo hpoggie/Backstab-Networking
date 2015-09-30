@@ -321,7 +321,7 @@ public class Backstab : MonoBehaviour {
 		broadcasters.Add(new ConnectionData(ip, port));
 	}
 
-	bool IsConnectionOk (int i) {
+	public bool IsConnectionOk (int i) {
 		string address;
 		int port;
 		UnityEngine.Networking.Types.NetworkID netId;
