@@ -31,10 +31,10 @@ public class NetScript : MonoBehaviour {
 	}
 
 	public virtual void OnBackstabConnectedToServer (ConnectionData data) { ; }
-	public virtual void OnClientConnected (ConnectionData data) { ; }
-	public virtual void OnDisconnectedFromServer () { ; }
-	public virtual void OnClientDisconnected () { ; }
-	public virtual void OnGotBroadcast () { ; }
+	public virtual void OnBackstabClientConnected (ConnectionData data) { ; }
+	public virtual void OnBackstabDisconnectedFromServer () { ; }
+	public virtual void OnBackstabClientDisconnected () { ; }
+	public virtual void OnBackstabGotBroadcast () { ; }
 	protected virtual void OnSync () { ; }
 
 	//Registering

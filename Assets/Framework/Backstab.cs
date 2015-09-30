@@ -263,7 +263,7 @@ public class Backstab : MonoBehaviour {
 					if (isServer) {					
 						clientConnectionIds[numConnections] = recSocketId;
 						foreach (NetScript inst in NetScript.instances) {
-							inst.OnClientConnected(data);
+							inst.OnBackstabClientConnected(data);
 						}
 					} else {
 						serverConnectionId = recConnectionId;
@@ -282,11 +282,11 @@ public class Backstab : MonoBehaviour {
 				case NetworkEventType.DisconnectEvent:
 					if (isServer) {
 						foreach (NetScript inst in NetScript.instances) {
-							inst.OnClientDisconnected();
+							inst.OnBackstabClientDisconnected();
 						}
 					} else {
 						foreach (NetScript inst in NetScript.instances) {
-							inst.OnDisconnectedFromServer();
+							inst.OnBackstabDisconnectedFromServer();
 						}
 					}
 					numConnections--;
@@ -301,7 +301,7 @@ public class Backstab : MonoBehaviour {
 					string message = (string)Deserialize(buffer);
 					TryAddBroadcaster(address, port, message);
 					foreach (NetScript inst in NetScript.instances) {
-						inst.OnGotBroadcast();
+						inst.OnBackstabGotBroadcast();
 					}
 					break;
 				default:

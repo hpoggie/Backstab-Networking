@@ -65,18 +65,18 @@ public class NetScriptTest : NetScript {
 		boxMessage = "Connected to " +data.address;
 	}
 
-	public override void OnClientConnected (ConnectionData data) {
+	public override void OnBackstabClientConnected (ConnectionData data) {
 		boxMessage = "Client has connected.";
 		RpcClientsReliable("GetServerOk");
 		RpcClientsReliable("FlipMessageA");
 		RpcClientsReliable("FlipMessageB");
 	}
 
-	public override void OnClientDisconnected () {
+	public override void OnBackstabClientDisconnected () {
 		boxMessage = "Client has disconnected.";
 	}
 
-	public override void OnGotBroadcast () {
+	public override void OnBackstabGotBroadcast () {
 		boxMessage = "Got broadcast.";
 	}
 	
