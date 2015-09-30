@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-public class BackstabGUI : MonoBehaviour {
-	public Backstab backstab;
+public class BackstabGUI : NetScript {
+	private ConnectionData serverData;
 
 	void OnGUI () {
 		if (backstab != null) {
@@ -11,7 +11,7 @@ public class BackstabGUI : MonoBehaviour {
 			} else if (backstab.IsClient) {
 				GUILayout.Box("Client active.");
 			} else if (backstab.IsClient && backstab.IsConnected) {
-				GUILayout.Box("Connected to server.");
+				GUILayout.Box("Connected to " + serverData.address);
 			} else {
 				GUILayout.Box("Not server or client.");
 			}
@@ -21,5 +21,9 @@ public class BackstabGUI : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	public override void OnBackstabConnectedToServer (ConnectionData data) {
+		serverData = data;
 	}
 }
