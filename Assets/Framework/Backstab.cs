@@ -111,6 +111,10 @@ public class Backstab : MonoBehaviour {
 			byte error;
 			NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, Serialize(broadcastMessage), packetSize, 1000, out error);
 			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
+
+			foreach (NetScript inst in NetScript.instances) {
+				inst.OnBackstabStartServer();
+			}
 		} else {
 			Debug.LogError("Can't become a server if already server or client.");
 		}
@@ -124,6 +128,10 @@ public class Backstab : MonoBehaviour {
 			byte error;
 			NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
 			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
+
+			foreach (NetScript inst in NetScript.instances) {
+				inst.OnBackstabStartClient();
+			}
 		}
 	}
 
@@ -168,6 +176,9 @@ public class Backstab : MonoBehaviour {
 		NetworkTransport.Init();
 		isServer = false;
 		isClient = false;
+		foreach (NetScript inst in NetScript.instances) {
+			inst.OnBackstabStopServer();
+		}
 	}
 
 	public void Kick (int index) {
@@ -259,19 +270,25 @@ public class Backstab : MonoBehaviour {
 				case NetworkEventType.Nothing:
 					break;
 				case NetworkEventType.ConnectEvent:
-					ConnectionData data = GetConnectionData(recConnectionId);
-					if (isServer) {					
-						clientConnectionIds[numConnections] = recSocketId;
-						foreach (NetScript inst in NetScript.instances) {
-							inst.OnBackstabClientConnected(data);
+					if (recError == (byte)NetworkError.Ok) {
+						ConnectionData data = GetConnectionData(recConnectionId);
+						if (isServer) {
+							clientConnectionIds[numConnections] = recSocketId;
+							foreach (NetScript inst in NetScript.instances) {
+								inst.OnBackstabClientConnected(data);
+							}
+						} else {
+							serverConnectionId = recConnectionId;
+							foreach (NetScript inst in NetScript.instances) {
+								inst.OnBackstabConnectedToServer(data);
+							}
 						}
+						numConnections++;
 					} else {
-						serverConnectionId = recConnectionId;
 						foreach (NetScript inst in NetScript.instances) {
-							inst.OnBackstabConnectedToServer(data);
+							inst.OnBackstabFailedToConnect();
 						}
 					}
-					numConnections++;
 					break;
 				case NetworkEventType.DataEvent:
 					System.Object packet = Deserialize(buffer);

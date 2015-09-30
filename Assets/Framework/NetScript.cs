@@ -30,10 +30,16 @@ public class NetScript : MonoBehaviour {
 		instances.Remove(this);
 	}
 
+	public virtual void OnBackstabStartServer () { ; }
+	public virtual void OnBackstabStartClient () { ; }
+	public virtual void OnBackstabStopServer () { ; }
+
 	public virtual void OnBackstabConnectedToServer (ConnectionData data) { ; }
 	public virtual void OnBackstabClientConnected (ConnectionData data) { ; }
 	public virtual void OnBackstabDisconnectedFromServer () { ; }
 	public virtual void OnBackstabClientDisconnected () { ; }
+	public virtual void OnBackstabFailedToConnect () { ; }
+
 	public virtual void OnBackstabGotBroadcast () { ; }
 	protected virtual void OnSync () { ; }
 
