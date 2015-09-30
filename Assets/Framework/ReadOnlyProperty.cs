@@ -2,11 +2,14 @@
  * Used to make some properties of Backstab read-only in the editor.
  */
 
-using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
+using UnityEngine;
 
 public class ReadOnlyAttribute : PropertyAttribute { }
 
+#if UNITY_EDITOR
 [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
 public class ReadOnlyDrawer : PropertyDrawer {
 	public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
@@ -19,3 +22,6 @@ public class ReadOnlyDrawer : PropertyDrawer {
 		GUI.enabled = true;
 	}
 }
+#endif
+
+public class ReadOnlyProperty : MonoBehaviour { }
