@@ -20,10 +20,13 @@ public class NetScript : MonoBehaviour {
 	
 	void Awake () {
 		instances.Add(this);
-		if (!backstab && Backstab.instances.Count > 0) backstab = Backstab.instances[0];
 		viewId = currentId;
 		currentId++;
 		InvokeRepeating("OnSync", syncInterval, syncInterval);
+	}
+
+	public virtual void OnBackstabAwake () {
+		if (!backstab && Backstab.instances.Count > 0) backstab = Backstab.instances[0];
 	}
 
 	void OnDestroy () {
