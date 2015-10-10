@@ -382,4 +382,8 @@ public class Backstab : MonoBehaviour {
 		Disconnect();
 	}
 
+	//GUI hooks
+
+	public void SetBroadcasterMessage (string message) { broadcastMessage = message; }
+
 }
