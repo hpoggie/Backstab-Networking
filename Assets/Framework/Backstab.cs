@@ -385,5 +385,6 @@ public class Backstab : MonoBehaviour {
 	//GUI hooks
 
 	public void SetBroadcasterMessage (string message) { broadcastMessage = message; }
+	public void SetMaxConnections (int max) { maxConnections = max; }
 
 }
