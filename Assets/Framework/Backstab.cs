@@ -367,6 +367,7 @@ public class Backstab : MonoBehaviour {
 	void Awake () {
 		if (!IsActive) NetworkTransport.Init();
 		instances.Add(this);
+		DontDestroyOnLoad(this);
 	}
 
 	void Update () {
