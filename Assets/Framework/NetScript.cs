@@ -5,44 +5,60 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Reflection;
+using System;
+
+[AttributeUsage(AttributeTargets.Method)]
+public class RpcAttribute : System.Attribute {
+}
 
 public class NetScript : MonoBehaviour {
 	public static int currentId = 0;
 	public static List<NetScript> instances = new List<NetScript>();
 	public static float syncInterval = 0.1f;
-
+	
 	public Backstab backstab;
-
+	
 	private int viewId;
 	public int ViewId { get { return viewId; } }
 	private MethodInfo[] rpcs = new MethodInfo[256];
 	private byte currentSize = 0;
 	
+	private BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
 	void Awake () {
 		instances.Add(this);
 		viewId = currentId;
 		currentId++;
+		
+		foreach (MethodInfo m in GetType().GetMethods(flags)) {
+			foreach (Attribute a in m.GetCustomAttributes(true)) {
+				RpcAttribute r = a as RpcAttribute;
+				if (r != null) {
+					RegisterRpc(m);
+				}
+			}
+		}
 	}
-
+	
 	public virtual void OnBackstabAwake () {
 		if (!backstab && Backstab.instances.Count > 0) backstab = Backstab.instances[0];
 		InvokeRepeating("OnSync", syncInterval, syncInterval);
 	}
-
+	
 	void OnDestroy () {
 		instances.Remove(this);
 	}
-
+	
 	public virtual void OnBackstabStartServer () { ; }
 	public virtual void OnBackstabStartClient () { ; }
 	public virtual void OnBackstabStopServer () { ; }
-
+	
 	public virtual void OnBackstabConnectedToServer (ConnectionData data) { ; }
 	public virtual void OnBackstabClientConnected (ConnectionData data) { ; }
 	public virtual void OnBackstabDisconnectedFromServer () { ; }
 	public virtual void OnBackstabClientDisconnected () { ; }
 	public virtual void OnBackstabFailedToConnect () { ; }
-
+	
 	public virtual void OnBackstabGotBroadcast () { ; }
 	protected virtual void OnSync () { ; }
 
