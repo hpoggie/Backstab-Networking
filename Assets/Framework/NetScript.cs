@@ -27,6 +27,7 @@ public class NetScript : MonoBehaviour {
 
 	void Awake () {
 		instances.Add(this);
+		if (!backstab) backstab = FindObjectOfType<Backstab>();
 		viewId = currentId;
 		currentId++;
 		

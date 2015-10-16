@@ -272,6 +272,7 @@ public class Backstab : MonoBehaviour {
 				case NetworkEventType.ConnectEvent:
 					if (recError == (byte)NetworkError.Ok) {
 						ConnectionData data = GetConnectionData(recConnectionId);
+						numConnections++;
 						if (isServer) {
 							clientConnectionIds[numConnections] = recSocketId;
 							foreach (NetScript inst in NetScript.instances) {
@@ -283,7 +284,6 @@ public class Backstab : MonoBehaviour {
 								inst.OnBackstabConnectedToServer(data);
 							}
 						}
-						numConnections++;
 					} else {
 						foreach (NetScript inst in NetScript.instances) {
 							inst.OnBackstabFailedToConnect();
@@ -370,6 +370,7 @@ public class Backstab : MonoBehaviour {
 		foreach (NetScript inst in NetScript.instances) {
 			inst.OnBackstabAwake();
 		}
+		DontDestroyOnLoad(this);
 	}
 
 	void Update () {
@@ -384,5 +385,10 @@ public class Backstab : MonoBehaviour {
 	void OnApplicationQuit () {
 		Disconnect();
 	}
+
+	//GUI hooks
+
+	public void SetBroadcasterMessage (string message) { broadcastMessage = message; }
+	public void SetMaxConnections (int max) { maxConnections = max; }
 
 }
