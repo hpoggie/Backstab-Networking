@@ -62,9 +62,9 @@ public class NetScriptTest : NetScript {
 
 	public override void OnBackstabClientConnected (ConnectionData data) {
 		boxMessage = "Client has connected.";
-		RpcClientsReliable("GetServerOk");
-		RpcClientsReliable("FlipMessageA");
-		RpcClientsReliable("FlipMessageB");
+		Rpc("GetServerOk");
+		Rpc("FlipMessageA");
+		Rpc("FlipMessageB");
 	}
 
 	public override void OnBackstabClientDisconnected () {
@@ -77,17 +77,17 @@ public class NetScriptTest : NetScript {
 	
 	//Rpcs
 	
-	[Rpc]
+	[Client]
 	public void GetServerOk () {
 		boxMessage = "Got OK from server.";
 	}
 	
-	[Rpc]
+	[Client]
 	public void FlipMessageA () {
 		Debug.Log("Got message A. This should be first.");
 	}
 	
-	[Rpc]
+	[Client]
 	public void FlipMessageB () {
 		Debug.Log("Got message B. This should be second.");
 	}

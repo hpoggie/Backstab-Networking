@@ -3,12 +3,18 @@
  */
 
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class RpcAttribute : Attribute { }
+public class RpcAttribute : Attribute {
+	public UnityEngine.Networking.QosType qosType = UnityEngine.Networking.QosType.Reliable;
+
+	public RpcAttribute () { }
+	public RpcAttribute (QosType qosType) { this.qosType = qosType; }
+}
 public class ServerAttribute : RpcAttribute { }
 public class ClientAttribute : RpcAttribute { }
 
@@ -74,38 +80,78 @@ public class NetScript : MonoBehaviour {
 	
 	//Rpc
 
+	/*
 	protected void Rpc (string fname, int playerId, params System.Object[] args) { RpcReliable(GetMethodIndex(fname), playerId, args); }
 	protected void RpcReliable (string fname, int playerId, params System.Object[] args) { RpcReliable(GetMethodIndex(fname), playerId, args); }
 	protected void RpcReliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcReliable(viewId, methodId, args, playerId); }
 	protected void RpcUnreliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcUnreliable(viewId, methodId, args, playerId); }
-
+	*/
 	protected void Rpc (string fname, params System.Object[] args) {
 		byte index = GetMethodIndex(fname);
+		bool isServer = false;
+		bool isClient = false;
+		QosType qosType = QosType.Reliable;
+
 		foreach (Attribute a in rpcs[index].GetCustomAttributes(true)) {
-			if (a is ServerAttribute) {
-				RpcServer(fname, args);
-			} else if (a is ClientAttribute) {
-				RpcClientsReliable(index, args);
+			if (a is RpcAttribute) {
+				qosType = (a as RpcAttribute).qosType;
+				if (a is ServerAttribute) isClient = true;
+				else if (a is ClientAttribute) isServer = true;
 			}
 		}
+
+		if (isServer && isClient) {
+			Debug.LogError("Can't be both server and client.");
+		} else if (!isServer && !isClient) {
+			Debug.LogError("Trying to send an Rpc when not server or client.");
+		} else if (isServer) {
+			RpcClients(index, qosType, args);
+		} else if (isClient) {
+			RpcServer(fname, qosType, args);
+		}
+	}
+
+	protected void RpcClients (string fname, params object[] args) {
+		byte index = GetMethodIndex(fname);
+		QosType qosType = QosType.Reliable;
+
+		foreach (Attribute a in rpcs[index].GetCustomAttributes(true)) {
+			if (a is RpcAttribute) qosType = (a as RpcAttribute).qosType;
+		}
+
+		RpcClients(index, qosType, args);
+	}
+
+	protected void RpcServer (string fname, params object[] args) {
+		byte index = GetMethodIndex(fname);
+		QosType qosType = QosType.Reliable;
+		
+		foreach (Attribute a in rpcs[index].GetCustomAttributes(true)) {
+			if (a is RpcAttribute) qosType = (a as RpcAttribute).qosType;
+		}
+		
+		RpcServer(index, qosType, args);
 	}
 
 	//RpcAll
 
+	protected void RpcClients (byte methodId, QosType qosType, params System.Object[] args) { backstab.RpcAll(viewId, methodId, qosType, args); }
+	/*
 	protected void RpcClients (string fname, params System.Object[] args) { RpcClientsReliable(GetMethodIndex(fname), args); }
 	protected void RpcClientsReliable (string fname, params System.Object[] args) { RpcClientsReliable(GetMethodIndex(fname), args); }
 	protected void RpcClientsReliable (byte methodId, params System.Object[] args) { backstab.RpcAllReliable(viewId, methodId, args); }
 	protected void RpcClientsUnreliable (string fname, params System.Object[] args) { RpcClientsUnreliable(GetMethodIndex(fname), args); }
 	protected void RpcClientsUnreliable (byte methodId, params System.Object[] args) { backstab.RpcAllUnreliable(viewId, methodId, args); }
-	
+	*/
+
 	//RpcServer
 
-	protected void RpcServer (string fname, params System.Object[] args) {
+	protected void RpcServer (byte methodId, QosType qosType, params System.Object[] args) {
 		if (backstab.IsServer) {
 			Debug.LogError("Can't send to server if already server.");
 			return;
 		} 
-		RpcReliable(GetMethodIndex(fname), 1, args);
+		backstab.Rpc(viewId, methodId, qosType, 1, args);
 	}
 	
 	//Recieving

@@ -11,10 +11,10 @@ using System.Collections;
 public class NetRigidbody : NetScript {
 	protected override void OnSync () {
 		if (backstab.IsServer) {
-			RpcClientsUnreliable("SyncPosition", transform.position.x, transform.position.y, transform.position.z);
-			RpcClientsUnreliable("SyncRotation", transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
-			RpcClientsUnreliable("SyncVelocity", GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, GetComponent<Rigidbody>().velocity.z);
-			RpcClientsUnreliable("SyncAngularVelocity", GetComponent<Rigidbody>().angularVelocity.x, GetComponent<Rigidbody>().angularVelocity.y, GetComponent<Rigidbody>().angularVelocity.z);
+			Rpc("SyncPosition", transform.position.x, transform.position.y, transform.position.z);
+			Rpc("SyncRotation", transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+			Rpc("SyncVelocity", GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, GetComponent<Rigidbody>().velocity.z);
+			Rpc("SyncAngularVelocity", GetComponent<Rigidbody>().angularVelocity.x, GetComponent<Rigidbody>().angularVelocity.y, GetComponent<Rigidbody>().angularVelocity.z);
 		}
 	}
 	

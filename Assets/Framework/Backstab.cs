@@ -62,6 +62,12 @@ public class ConnectionData {
 	}
 }
 
+[System.Serializable]
+public class ChannelData {
+	public QosType qosType;
+	[ReadOnly] public int id;
+}
+
 public class Backstab : MonoBehaviour {
 	public static List<Backstab> instances = new List<Backstab>();
 	public static bool IsActive { get { return (instances.Count > 0); } }
@@ -82,8 +88,10 @@ public class Backstab : MonoBehaviour {
 	private int[] clientConnectionIds;
 	private int numConnections = 0;
 	public int NumConnections { get { return numConnections; } }
-	private int reliableChannelId;
-	private int unreliableChannelId;
+
+	public ChannelData[] channelData;
+	//private int reliableChannelId;
+	//private int unreliableChannelId;
 
 	private bool isServer;
 	public bool IsServer { get { return isServer; } }
@@ -187,7 +195,7 @@ public class Backstab : MonoBehaviour {
 	}
 	
 	//Sending
-
+	/*
 	public void RpcAllReliable (int viewId, byte methodId, System.Object[] args) {
 		RpcAll(viewId, methodId, reliableChannelId, args);
 	}
@@ -195,19 +203,24 @@ public class Backstab : MonoBehaviour {
 	public void RpcAllUnreliable (int viewId, byte methodId, System.Object[] args) {
 		RpcAll(viewId, methodId, unreliableChannelId, args);
 	}
+	*/
+
+	public void RpcAll (int viewId, byte methodId, QosType qtype, object[] args) {
+		;
+	}
 
 	public void RpcAll (int viewId, byte methodId, int channelId, System.Object[] args) {
 		if (isServer) {
 			for (int i = 0; i < clientConnectionIds.Length; i++) {
 				if (IsConnectionOk(i)) {
-					Rpc(viewId, methodId, args, channelId, i);
+					Rpc(viewId, methodId, channelId, i, args);
 				}
 			}
 		} else {
 			Debug.LogError("Not the server. Can't send to clients.");
 		}
 	}
-
+	/*
 	public void RpcReliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
 		Rpc(viewId, methodId, args, reliableChannelId, connectionId);
 	}
@@ -215,8 +228,13 @@ public class Backstab : MonoBehaviour {
 	public void RpcUnreliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
 		Rpc(viewId, methodId, args, unreliableChannelId, connectionId);
 	}
+	*/
 
-	public void Rpc (int viewId, byte methodId, System.Object[] args, int channelId, int connectionId) {
+	public void Rpc (int viewId, byte methodId, QosType qtype, int connectionId, System.Object[] args) {
+		Rpc(viewId, methodId, qtype, connectionId, args);
+	}
+
+	public void Rpc (int viewId, byte methodId, int channelId, int connectionId, System.Object[] args) {
 		Send(new RpcData(viewId, methodId, args), channelId, connectionId);
 	}
 
@@ -249,8 +267,9 @@ public class Backstab : MonoBehaviour {
 
 	private void OpenSocket (int socketPort) {
 		ConnectionConfig config = new ConnectionConfig();
-		reliableChannelId = config.AddChannel(QosType.Reliable);
-		unreliableChannelId = config.AddChannel(QosType.Unreliable);
+		//reliableChannelId = config.AddChannel(QosType.Reliable);
+		//unreliableChannelId = config.AddChannel(QosType.Unreliable);
+		foreach (ChannelData d in channelData) { d.id = config.AddChannel(d.qosType); }
 		ConnectionConfig.Validate(config);
 
 		clientConnectionIds = new int[maxConnections];
@@ -361,7 +380,16 @@ public class Backstab : MonoBehaviour {
 			return null;
 		}
 	}
-	
+
+	private int GetChannel (QosType qtype) {
+		for (int i = 0; i < channelData.Length; i++) {
+			if (channelData[i].qosType == qtype) {
+				return channelData[i].id;
+			}
+		}
+		return -1;
+	}
+
 	//Non-static
 
 	void Awake () {

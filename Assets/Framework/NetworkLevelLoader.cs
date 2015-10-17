@@ -8,10 +8,10 @@ public class NetworkLevelLoader : NetScript {
 			return;
 		}
 		Application.LoadLevel(level);
-		RpcClientsReliable("LoadLevel", level);
+		Rpc("LoadLevel", level);
 	}
 
-	[Rpc]
+	[Client]
 	void LoadLevel (int level) {
 		Application.LoadLevel(level);
 	}
