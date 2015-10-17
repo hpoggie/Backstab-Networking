@@ -19,16 +19,16 @@ public class NetRigidbody : NetScript {
 	*/
 	protected override void OnSync () {
 		if (backstab.IsServer) {
-			//RpcClientsUnreliable("SyncPosition", transform.position.x, transform.position.y, transform.position.z);
-			RpcClientsUnreliable("SyncPosition", transform.position);
+			RpcClientsUnreliable("SyncPosition", transform.position.x, transform.position.y, transform.position.z);
+			//RpcClientsUnreliable("SyncPosition", transform.position);
 			RpcClientsUnreliable("SyncRotation", transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
 			RpcClientsUnreliable("SyncVelocity", GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, GetComponent<Rigidbody>().velocity.z);
 			RpcClientsUnreliable("SyncAngularVelocity", GetComponent<Rigidbody>().angularVelocity.x, GetComponent<Rigidbody>().angularVelocity.y, GetComponent<Rigidbody>().angularVelocity.z);
 		}
 	}
 	
-	[Rpc] public void SyncPosition (Vector3 pos) { transform.position = pos; }
-	//[Rpc] public void SyncPosition (float x, float y, float z) { transform.position = new Vector3(x, y, z); }
+	//[Rpc] public void SyncPosition (Vector3 pos) { transform.position = pos; }
+	[Rpc] public void SyncPosition (float x, float y, float z) { transform.position = new Vector3(x, y, z); }
 	[Rpc] public void SyncRotation (float x, float y, float z) { transform.rotation = Quaternion.Euler(x, y, z); }
 	[Rpc] public void SyncVelocity (float x, float y, float z) { GetComponent<Rigidbody>().velocity = new Vector3(x, y, z); }
 	[Rpc] public void SyncAngularVelocity (float x, float y, float z) { GetComponent<Rigidbody>().angularVelocity = new Vector3(x, y, z); }

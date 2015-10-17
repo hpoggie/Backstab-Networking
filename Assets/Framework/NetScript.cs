@@ -39,10 +39,7 @@ public class NetScript : MonoBehaviour {
 				}
 			}
 		}
-	}
-	
-	public virtual void OnBackstabAwake () {
-		if (!backstab && Backstab.instances.Count > 0) backstab = Backstab.instances[0];
+
 		InvokeRepeating("OnSync", syncInterval, syncInterval);
 	}
 	
