@@ -78,7 +78,18 @@ public class NetScript : MonoBehaviour {
 	protected void RpcReliable (string fname, int playerId, params System.Object[] args) { RpcReliable(GetMethodIndex(fname), playerId, args); }
 	protected void RpcReliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcReliable(viewId, methodId, args, playerId); }
 	protected void RpcUnreliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcUnreliable(viewId, methodId, args, playerId); }
-	
+
+	protected void Rpc (string fname, params System.Object[] args) {
+		byte index = GetMethodIndex(fname);
+		foreach (Attribute a in rpcs[index].GetCustomAttributes(true)) {
+			if (a is ServerAttribute) {
+				RpcServer(fname, args);
+			} else if (a is ClientAttribute) {
+				RpcClientsReliable(index, args);
+			}
+		}
+	}
+
 	//RpcAll
 
 	protected void RpcClients (string fname, params System.Object[] args) { RpcClientsReliable(GetMethodIndex(fname), args); }
