@@ -2,10 +2,6 @@
 using System.Collections;
 
 public class NetworkLevelLoader : NetScript {
-	void Start () {
-		RegisterRpc("LoadLevel");
-	}
-	
 	void AllLoadLevel (int level) {
 		if (!backstab.IsServer) {
 			Debug.LogError("Can't issue LoadLevel messages if not the server.");
@@ -15,6 +11,7 @@ public class NetworkLevelLoader : NetScript {
 		RpcClientsReliable("LoadLevel", level);
 	}
 
+	[Rpc]
 	void LoadLevel (int level) {
 		Application.LoadLevel(level);
 	}

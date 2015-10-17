@@ -11,7 +11,6 @@ public class Chat : NetScript {
 
 	void Start () {
 		log = new string[maxLog];
-		RegisterRpc("RemoteLog");
 	}
 	
 	void Update () {
@@ -62,6 +61,7 @@ public class Chat : NetScript {
 		}
 	}
 
+	[Rpc]
 	public void RemoteLog (string s) {
 		Log("Con. " +backstab.recConnectionId +": " +s);
 	}

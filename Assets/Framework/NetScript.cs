@@ -62,17 +62,13 @@ public class NetScript : MonoBehaviour {
 
 	//Registering
 
-	protected void RegisterRpc (MethodInfo method) {
+	private void RegisterRpc (MethodInfo method) {
 		if (method != null) {
 			rpcs[currentSize] = method;
 			currentSize++;
 		} else {
 			Debug.LogError("Null method passed to RegisterRpc. Make sure your Rpcs are public.");
 		}
-	}
-
-	protected void RegisterRpc (string fname) {
-		RegisterRpc(GetType().GetMethod(fname));
 	}
 	
 	//Rpc

@@ -8,11 +8,6 @@ public class NetScriptTest : NetScript {
 	
 	void Start () {
 		backstab.broadcastMessage = broadcastMessage;
-		//RegisterRpc("GetServerOk");
-		//These are to verify that Backstab does not reverse the order of RPCs sent on the same frame,
-		//which Unity's old networking system (from before 5.1) did.
-		//RegisterRpc("FlipMessageA");
-		//RegisterRpc("FlipMessageB");
 	}
 
 	void OnGUI () {
