@@ -100,7 +100,20 @@ public class NetScript : MonoBehaviour {
 	//Recieving
 
 	public void RecieveRpc (RpcData rpc) {
-		rpcs[rpc.methodId].Invoke(this, rpc.args);
+		MethodInfo m = rpcs[rpc.methodId];
+
+		foreach (Attribute a in m.GetCustomAttributes(true)) {
+			if (a is ServerAttribute && !backstab.IsServer) {
+				Debug.LogError("Can't recieve server Rpcs if not the server.");
+				return;
+			}
+			if (a is ClientAttribute && !backstab.IsClient) {
+				Debug.LogError("Can't recieve client Rpcs if not a client.");
+				return;
+			}
+		}
+
+		m.Invoke(this, rpc.args);
 	}
 
 	public byte GetMethodIndex (string s) {
