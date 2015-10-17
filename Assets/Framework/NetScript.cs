@@ -8,8 +8,9 @@ using System.Reflection;
 using System;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class RpcAttribute : System.Attribute {
-}
+public class RpcAttribute : Attribute { }
+public class ServerAttribute : RpcAttribute { }
+public class ClientAttribute : RpcAttribute { }
 
 public class NetScript : MonoBehaviour {
 	public static int currentId = 0;
