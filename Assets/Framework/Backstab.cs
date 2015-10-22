@@ -195,18 +195,9 @@ public class Backstab : MonoBehaviour {
 	}
 	
 	//Sending
-	/*
-	public void RpcAllReliable (int viewId, byte methodId, System.Object[] args) {
-		RpcAll(viewId, methodId, reliableChannelId, args);
-	}
-
-	public void RpcAllUnreliable (int viewId, byte methodId, System.Object[] args) {
-		RpcAll(viewId, methodId, unreliableChannelId, args);
-	}
-	*/
 
 	public void RpcAll (int viewId, byte methodId, QosType qtype, object[] args) {
-		;
+		RpcAll(viewId, methodId, GetChannel(qtype), args);
 	}
 
 	public void RpcAll (int viewId, byte methodId, int channelId, System.Object[] args) {
@@ -220,18 +211,9 @@ public class Backstab : MonoBehaviour {
 			Debug.LogError("Not the server. Can't send to clients.");
 		}
 	}
-	/*
-	public void RpcReliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
-		Rpc(viewId, methodId, args, reliableChannelId, connectionId);
-	}
-
-	public void RpcUnreliable (int viewId, byte methodId, System.Object[] args, int connectionId) {
-		Rpc(viewId, methodId, args, unreliableChannelId, connectionId);
-	}
-	*/
 
 	public void Rpc (int viewId, byte methodId, QosType qtype, int connectionId, System.Object[] args) {
-		Rpc(viewId, methodId, qtype, connectionId, args);
+		Rpc(viewId, methodId, GetChannel(qtype), connectionId, args);
 	}
 
 	public void Rpc (int viewId, byte methodId, int channelId, int connectionId, System.Object[] args) {
