@@ -80,12 +80,6 @@ public class NetScript : MonoBehaviour {
 	
 	//Rpc
 
-	/*
-	protected void Rpc (string fname, int playerId, params System.Object[] args) { RpcReliable(GetMethodIndex(fname), playerId, args); }
-	protected void RpcReliable (string fname, int playerId, params System.Object[] args) { RpcReliable(GetMethodIndex(fname), playerId, args); }
-	protected void RpcReliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcReliable(viewId, methodId, args, playerId); }
-	protected void RpcUnreliable (byte methodId, int playerId, params System.Object[] args) { backstab.RpcUnreliable(viewId, methodId, args, playerId); }
-	*/
 	protected void Rpc (string fname, params System.Object[] args) {
 		byte index = GetMethodIndex(fname);
 		bool isServer = false;
@@ -136,13 +130,6 @@ public class NetScript : MonoBehaviour {
 	//RpcAll
 
 	protected void RpcClients (byte methodId, QosType qosType, params System.Object[] args) { backstab.RpcAll(viewId, methodId, qosType, args); }
-	/*
-	protected void RpcClients (string fname, params System.Object[] args) { RpcClientsReliable(GetMethodIndex(fname), args); }
-	protected void RpcClientsReliable (string fname, params System.Object[] args) { RpcClientsReliable(GetMethodIndex(fname), args); }
-	protected void RpcClientsReliable (byte methodId, params System.Object[] args) { backstab.RpcAllReliable(viewId, methodId, args); }
-	protected void RpcClientsUnreliable (string fname, params System.Object[] args) { RpcClientsUnreliable(GetMethodIndex(fname), args); }
-	protected void RpcClientsUnreliable (byte methodId, params System.Object[] args) { backstab.RpcAllUnreliable(viewId, methodId, args); }
-	*/
 
 	//RpcServer
 

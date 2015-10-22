@@ -90,8 +90,6 @@ public class Backstab : MonoBehaviour {
 	public int NumConnections { get { return numConnections; } }
 
 	public ChannelData[] channelData;
-	//private int reliableChannelId;
-	//private int unreliableChannelId;
 
 	private bool isServer;
 	public bool IsServer { get { return isServer; } }
@@ -249,8 +247,6 @@ public class Backstab : MonoBehaviour {
 
 	private void OpenSocket (int socketPort) {
 		ConnectionConfig config = new ConnectionConfig();
-		//reliableChannelId = config.AddChannel(QosType.Reliable);
-		//unreliableChannelId = config.AddChannel(QosType.Unreliable);
 		foreach (ChannelData d in channelData) { d.id = config.AddChannel(d.qosType); }
 		ConnectionConfig.Validate(config);
 
