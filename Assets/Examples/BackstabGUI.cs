@@ -3,6 +3,8 @@
 public class BackstabGUI : NetScript {
 	private ConnectionData serverData;
 
+	public string ipAddress;
+
 	void OnGUI () {
 		if (backstab != null) {
 			GUILayout.Box("Your socket ID is " +backstab.LocalSocketId);
@@ -15,10 +17,17 @@ public class BackstabGUI : NetScript {
 			} else {
 				GUILayout.Box("Not server or client.");
 			}
+			
 			foreach (ConnectionData b in backstab.broadcasters) {
 				if (GUILayout.Button(b.ToString())) {
 					backstab.Connect(b.address, b.port);
 				}
+			}
+			
+			ipAddress = GUILayout.TextField(ipAddress);
+
+			if (GUILayout.Button("Connect")) {
+				backstab.Connect(ipAddress);
 			}
 		}
 	}
