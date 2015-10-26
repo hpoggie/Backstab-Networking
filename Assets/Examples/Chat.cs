@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Chat : NetScript {
 	public string text = "Type message here.";
+	public string typingBox = "";
 	public int maxLog = 10;
 	public double messageLifetime = 5;
 	private string[] log;
@@ -12,7 +14,7 @@ public class Chat : NetScript {
 	void Start () {
 		log = new string[maxLog];
 	}
-	
+
 	void Update () {
 		if (Time.realtimeSinceStartup - lastTime > messageLifetime) {
 			lastTime = Time.realtimeSinceStartup;
@@ -38,6 +40,9 @@ public class Chat : NetScript {
 			GUILayout.Box("-----------Type Below-----------");
 			GUILayout.Box(text);
 		}
+
+		if (typingBox.Length > 0) GUILayout.Box(typingBox);
+
 		GUILayout.EndArea();
 
 		GetTyping();
@@ -56,14 +61,23 @@ public class Chat : NetScript {
 			isTyping = !isTyping;
 		} else if (isTyping && Event.current.keyCode == KeyCode.Backspace && text.Length > 1) {
 			text = text.Substring(0, text.Length - 2);
+			if (backstab.IsServer) RpcClients("UpdateText", text);
+			else if (backstab.IsClient) RpcServer("UpdateText", text);
 		} else if (isTyping && c != '\n') {
 			text += c;
+			if (backstab.IsServer) RpcClients("UpdateText", text);
+			else if (backstab.IsClient) RpcServer("UpdateText", text);
 		}
 	}
 
 	[Rpc]
 	public void RemoteLog (string s) {
 		Log("Con. " +backstab.recConnectionId +": " +s);
+	}
+
+	[Rpc]
+	public void UpdateText (string s) {
+		typingBox = s;
 	}
 
 	public void Log (string s) {

@@ -3,9 +3,9 @@
  * 
  * To start a server, call StartServer().
  * To start a client, call StartClient().
- * To connect to a server, call Backstab.Connect(someIp), where someIp is the ip address of the server.
- * To disconnect or stop the server, call Backstab.Disconnect().
- * To quit, call Backstab.Quit().
+ * To connect to a server, call Connect(someIp), where someIp is the ip address of the server.
+ * To disconnect or stop the server, call Disconnect().
+ * To quit, call Quit().
  * 
  * Backstab has no SyncVars. Everything must be done from RPCs.
  * RPCs must be done from NetScript components; all your scripts with RPCs must inherit from NetScript.
@@ -90,8 +90,6 @@ public class Backstab : MonoBehaviour {
 	public int NumConnections { get { return numConnections; } }
 
 	public ChannelData[] channelData;
-	//private int reliableChannelId;
-	//private int unreliableChannelId;
 
 	private bool isServer;
 	public bool IsServer { get { return isServer; } }
@@ -249,8 +247,6 @@ public class Backstab : MonoBehaviour {
 
 	private void OpenSocket (int socketPort) {
 		ConnectionConfig config = new ConnectionConfig();
-		//reliableChannelId = config.AddChannel(QosType.Reliable);
-		//unreliableChannelId = config.AddChannel(QosType.Unreliable);
 		foreach (ChannelData d in channelData) { d.id = config.AddChannel(d.qosType); }
 		ConnectionConfig.Validate(config);
 
