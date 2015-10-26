@@ -143,12 +143,7 @@ public class Backstab : MonoBehaviour {
 
 	//Warning: Minor Black Magic. I do not know what all of these arguments do.
 	public void Connect (string ip) {
-		if (isClient && !IsConnected) {
-			byte error;
-			NetworkTransport.Connect(localSocketId, ip, port, 0, out error);
-		} else {
-			Debug.LogError("Can't connect if not a client or already connected.");
-		}
+		Connect(ip, port);	
 	}
 
 	//Warning: Minor Black Magic. I do not know what all of these arguments do.
