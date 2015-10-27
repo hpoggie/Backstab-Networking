@@ -4,7 +4,6 @@ public class BackstabGUI : NetScript {
 	private ConnectionData serverData;
 
 	public string ipAddress;
-	public bool debugMode = true;
 
 	void OnGUI () {
 		if (backstab != null) {
@@ -30,8 +29,6 @@ public class BackstabGUI : NetScript {
 			if (GUILayout.Button("Connect")) {
 				backstab.Connect(ipAddress);
 			}
-
-			if (debugMode) GUILayout.Box(backstab.LocalSocketId.ToString());
 		}
 	}
 
