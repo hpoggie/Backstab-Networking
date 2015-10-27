@@ -88,6 +88,7 @@ public class Backstab : MonoBehaviour {
 	private int[] clientConnectionIds;
 	private int numConnections = 0;
 	public int NumConnections { get { return numConnections; } }
+	private int attemptConnectionId = -108; //The ID of the connection most recently attempted.
 
 	public ChannelData[] channelData;
 
@@ -149,7 +150,8 @@ public class Backstab : MonoBehaviour {
 	public void Connect (string ip, int connectPort) {
 		if (isClient && !IsConnected) {
 			byte error;
-			NetworkTransport.Connect(localSocketId, ip, connectPort, 0, out error);
+			attemptConnectionId = NetworkTransport.Connect(localSocketId, ip, connectPort, 0, out error);
+			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to connect because " +error);
 		} else {
 			Debug.LogError("Can't connect if not a client or already connected.");
 		}
@@ -261,7 +263,7 @@ public class Backstab : MonoBehaviour {
 				case NetworkEventType.Nothing:
 					break;
 				case NetworkEventType.ConnectEvent:
-					if (recError == (byte)NetworkError.Ok) {
+					if (recSocketId == localSocketId && recConnectionId == attemptConnectionId && recError == (byte)NetworkError.Ok) {
 						ConnectionData data = GetConnectionData(recConnectionId);
 						numConnections++;
 						if (isServer) {
@@ -274,6 +276,7 @@ public class Backstab : MonoBehaviour {
 							foreach (NetScript inst in NetScript.instances) {
 								inst.OnBackstabConnectedToServer(data);
 							}
+							Debug.Log("Connection failed.");
 						}
 					} else {
 						foreach (NetScript inst in NetScript.instances) {
