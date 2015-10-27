@@ -113,14 +113,14 @@ public class Backstab : MonoBehaviour {
 		if (!isServer && !isClient) {
 			isServer = true;
 			OpenSocket(0);
-
+			
+			byte[] m = Serialize(broadcastMessage);
 			byte error;
-			NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, Serialize(broadcastMessage), packetSize, 1000, out error);
+			NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
+			
 			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
 
-			foreach (NetScript inst in NetScript.instances) {
-				inst.OnBackstabStartServer();
-			}
+			foreach (NetScript inst in NetScript.instances) inst.OnBackstabStartServer();
 		} else {
 			Debug.LogError("Can't become a server if already server or client.");
 		}
@@ -141,7 +141,6 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	//Warning: Minor Black Magic. I do not know what all of these arguments do.
 	public void Connect (string ip) {
 		Connect(ip, port);	
 	}
