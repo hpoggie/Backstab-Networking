@@ -135,7 +135,6 @@ public class Backstab : MonoBehaviour {
 			byte error;
 			NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
 			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
-
 			foreach (NetScript inst in NetScript.instances) {
 				inst.OnBackstabStartClient();
 			}
@@ -146,7 +145,8 @@ public class Backstab : MonoBehaviour {
 		Connect(ip, port);	
 	}
 
-	//Warning: Minor Black Magic. I do not know what all of these arguments do.
+	//Warning: Minor Black Magic. I do not know what the 4th argument does.
+	//Docs say the 4th argument is "exceptionConnectionId", whatever that means.
 	public void Connect (string ip, int connectPort) {
 		if (isClient && !IsConnected) {
 			byte error;
@@ -271,12 +271,14 @@ public class Backstab : MonoBehaviour {
 							foreach (NetScript inst in NetScript.instances) {
 								inst.OnBackstabClientConnected(data);
 							}
-						} else {
+						} else if (isClient) {
 							serverConnectionId = recConnectionId;
 							foreach (NetScript inst in NetScript.instances) {
 								inst.OnBackstabConnectedToServer(data);
 							}
-							Debug.Log("Connection failed.");
+							//Debug.Log("Connection failed.");
+						} else {
+							Debug.LogError("Can't connect if neither server nor client.");
 						}
 					} else {
 						foreach (NetScript inst in NetScript.instances) {
@@ -349,6 +351,7 @@ public class Backstab : MonoBehaviour {
 		UnityEngine.Networking.Types.NodeID nodeId;
 		byte error;
 		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out port, out netId, out nodeId, out error);
+
 		if (error == (byte)NetworkError.Ok) {
 			return new ConnectionData(address, port);
 		} else {
