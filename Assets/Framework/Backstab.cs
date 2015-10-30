@@ -112,8 +112,11 @@ public class Backstab : MonoBehaviour {
 
 	public void StartServer () {
 		if (!isServer && !isClient) {
+			clientConnectionIds = new int[maxConnections];
+			HostTopology topology = new HostTopology(GetConnectionConfig(), maxConnections);
+			localSocketId = NetworkTransport.AddHost(topology, 0, null);
+			
 			isServer = true;
-			OpenSocket(0);
 			
 			byte[] m = Serialize(broadcastMessage);
 			byte error;
@@ -129,7 +132,10 @@ public class Backstab : MonoBehaviour {
 
 	public void StartClient () {
 		if (!isServer && !isClient) {
-			OpenSocket(port);
+			//clientConnectionIds = new int[0];
+			HostTopology topology = new HostTopology(GetConnectionConfig(), 1);
+			localSocketId = NetworkTransport.AddHost(topology, port, null);
+
 			isClient = true;
 
 			byte error;
@@ -241,14 +247,11 @@ public class Backstab : MonoBehaviour {
 	
 	//Private functions
 
-	private void OpenSocket (int socketPort) {
+	private ConnectionConfig GetConnectionConfig () {
 		ConnectionConfig config = new ConnectionConfig();
 		foreach (ChannelData d in channelData) { d.id = config.AddChannel(d.qosType); }
 		ConnectionConfig.Validate(config);
-
-		clientConnectionIds = new int[maxConnections];
-		HostTopology topology = new HostTopology(config, maxConnections);
-		localSocketId = NetworkTransport.AddHost(topology, socketPort, null);
+		return config;
 	}
 
 	private void Listen () {
