@@ -114,15 +114,17 @@ public class Backstab : MonoBehaviour {
 		if (!isServer && !isClient) {
 			clientConnectionIds = new int[maxConnections];
 			HostTopology topology = new HostTopology(GetConnectionConfig(), maxConnections);
-			localSocketId = NetworkTransport.AddHost(topology, 0, null);
+			localSocketId = NetworkTransport.AddHost(topology, port,  null);
 			
 			isServer = true;
 			
-			byte[] m = Serialize(broadcastMessage);
-			byte error;
-			NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
-			
-			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
+			//byte[] m = Serialize(broadcastMessage);
+			//byte error;
+			//NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
+			//NetworkTransport.StartSendMulticast(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
+
+			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
+			Discovery.Instance.StartBroadcast();
 
 			foreach (NetScript inst in NetScript.instances) inst.OnBackstabStartServer();
 		} else {
@@ -134,13 +136,15 @@ public class Backstab : MonoBehaviour {
 		if (!isServer && !isClient) {
 			//clientConnectionIds = new int[0];
 			HostTopology topology = new HostTopology(GetConnectionConfig(), 1);
-			localSocketId = NetworkTransport.AddHost(topology, port, null);
+			localSocketId = NetworkTransport.AddHost(topology, 0, null);
 
 			isClient = true;
 
-			byte error;
-			NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
-			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
+			//byte error;
+			//NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
+			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
+			Discovery.Instance.StartListening();
+
 			foreach (NetScript inst in NetScript.instances) {
 				inst.OnBackstabStartClient();
 			}
@@ -327,7 +331,7 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	private void TryAddBroadcaster (string ip, int port, string message) {
+	public void TryAddBroadcaster (string ip, int port, string message) {
 		foreach (ConnectionData b in broadcasters) {
 			if (b.address == ip && b.port == port) {
 				b.message = message;
