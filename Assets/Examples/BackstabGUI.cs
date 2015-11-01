@@ -20,7 +20,7 @@ public class BackstabGUI : NetScript {
 			
 			foreach (ConnectionData b in backstab.broadcasters) {
 				if (GUILayout.Button(b.ToString())) {
-					backstab.Connect(b.address, b.port);
+					backstab.Connect(b.address);
 				}
 			}
 			

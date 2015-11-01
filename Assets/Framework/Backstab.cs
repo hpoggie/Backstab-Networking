@@ -30,9 +30,13 @@
 
 using UnityEngine;
 using UnityEngine.Networking;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+//Used for broadcast discovery
+using System.Net;
+using System.Net.Sockets;
 
 [System.Serializable]
 public class RpcData {
@@ -88,6 +92,7 @@ public class Backstab : MonoBehaviour {
 	private int[] clientConnectionIds;
 	private int numConnections = 0;
 	public int NumConnections { get { return numConnections; } }
+	private int attemptConnectionId = -108; //The ID of the connection most recently attempted.
 
 	public ChannelData[] channelData;
 
@@ -103,6 +108,12 @@ public class Backstab : MonoBehaviour {
 	[ReadOnly] public int recievedSize;
 	[ReadOnly] public byte recError;
 	
+	private IPAddress broadcastAddress = IPAddress.Parse("224.0.0.224");
+	public int broadcastPort = 8889;
+
+	private UdpClient broadcastClient;
+	private IPEndPoint remoteEnd;
+
 	//Basic functions
 
 	public static void Quit () {
@@ -111,14 +122,19 @@ public class Backstab : MonoBehaviour {
 
 	public void StartServer () {
 		if (!isServer && !isClient) {
+			clientConnectionIds = new int[maxConnections];
+			HostTopology topology = new HostTopology(GetConnectionConfig(), maxConnections);
+			localSocketId = NetworkTransport.AddHost(topology, port,  null);
+			
 			isServer = true;
-			OpenSocket(0);
 			
-			byte[] m = Serialize(broadcastMessage);
-			byte error;
-			NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
-			
-			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
+			//byte[] m = Serialize(broadcastMessage);
+			//byte error;
+			//NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
+			//NetworkTransport.StartSendMulticast(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
+
+			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
+			StartBroadcast();
 
 			foreach (NetScript inst in NetScript.instances) inst.OnBackstabStartServer();
 		} else {
@@ -128,12 +144,16 @@ public class Backstab : MonoBehaviour {
 
 	public void StartClient () {
 		if (!isServer && !isClient) {
-			OpenSocket(port);
+			//clientConnectionIds = new int[0];
+			HostTopology topology = new HostTopology(GetConnectionConfig(), 1);
+			localSocketId = NetworkTransport.AddHost(topology, 0, null);
+
 			isClient = true;
 
-			byte error;
-			NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
-			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
+			//byte error;
+			//NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
+			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
+			StartListeningForBroadcast();
 
 			foreach (NetScript inst in NetScript.instances) {
 				inst.OnBackstabStartClient();
@@ -145,11 +165,13 @@ public class Backstab : MonoBehaviour {
 		Connect(ip, port);	
 	}
 
-	//Warning: Minor Black Magic. I do not know what all of these arguments do.
+	//Warning: Minor Black Magic. I do not know what the 4th argument does.
+	//Docs say the 4th argument is "exceptionConnectionId", whatever that means.
 	public void Connect (string ip, int connectPort) {
 		if (isClient && !IsConnected) {
 			byte error;
-			NetworkTransport.Connect(localSocketId, ip, connectPort, 0, out error);
+			attemptConnectionId = NetworkTransport.Connect(localSocketId, ip, connectPort, 0, out error);
+			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to connect because " +error);
 		} else {
 			Debug.LogError("Can't connect if not a client or already connected.");
 		}
@@ -236,17 +258,45 @@ public class Backstab : MonoBehaviour {
 		NetScript inst = NetScript.instances[rpc.sceneId];
 		inst.RecieveRpc(rpc);
 	}
+
+	//Broadcast Discovery
+	
+	public void StartBroadcast () {
+		broadcastClient = new UdpClient();
+		broadcastClient.JoinMulticastGroup(broadcastAddress);
+		remoteEnd = new IPEndPoint(broadcastAddress, broadcastPort);
+		InvokeRepeating("Broadcast", 0, 1);
+	}
+
+	void Broadcast () {
+		byte[] buffer = Serialize(broadcastMessage);
+		broadcastClient.Send(buffer, buffer.Length, remoteEnd);
+	}
+
+	void StopBroadcast () {
+		CancelInvoke("Broadcast");
+	}
+
+	private void StartListeningForBroadcast () {
+		remoteEnd = new IPEndPoint(IPAddress.Any, broadcastPort);
+		broadcastClient = new UdpClient(remoteEnd);
+		broadcastClient.JoinMulticastGroup(broadcastAddress);
+		broadcastClient.BeginReceive(new AsyncCallback(GotBroadcastCallback), null);
+	}
+
+	void GotBroadcastCallback (IAsyncResult ar) {
+		string recMessage = Deserialize(broadcastClient.EndReceive(ar, ref remoteEnd)).ToString();
+		string recServerIp = remoteEnd.Address.ToString();
+		TryAddBroadcaster(recServerIp, broadcastPort, recMessage);
+	}
 	
 	//Private functions
 
-	private void OpenSocket (int socketPort) {
+	private ConnectionConfig GetConnectionConfig () {
 		ConnectionConfig config = new ConnectionConfig();
 		foreach (ChannelData d in channelData) { d.id = config.AddChannel(d.qosType); }
 		ConnectionConfig.Validate(config);
-
-		clientConnectionIds = new int[maxConnections];
-		HostTopology topology = new HostTopology(config, maxConnections);
-		localSocketId = NetworkTransport.AddHost(topology, socketPort, null);
+		return config;
 	}
 
 	private void Listen () {
@@ -261,7 +311,7 @@ public class Backstab : MonoBehaviour {
 				case NetworkEventType.Nothing:
 					break;
 				case NetworkEventType.ConnectEvent:
-					if (recError == (byte)NetworkError.Ok) {
+					if (recSocketId == localSocketId && recConnectionId == attemptConnectionId && recError == (byte)NetworkError.Ok) {
 						ConnectionData data = GetConnectionData(recConnectionId);
 						numConnections++;
 						if (isServer) {
@@ -269,11 +319,14 @@ public class Backstab : MonoBehaviour {
 							foreach (NetScript inst in NetScript.instances) {
 								inst.OnBackstabClientConnected(data);
 							}
-						} else {
+						} else if (isClient) {
 							serverConnectionId = recConnectionId;
 							foreach (NetScript inst in NetScript.instances) {
 								inst.OnBackstabConnectedToServer(data);
 							}
+							//Debug.Log("Connection failed.");
+						} else {
+							Debug.LogError("Can't connect if neither server nor client.");
 						}
 					} else {
 						foreach (NetScript inst in NetScript.instances) {
@@ -319,7 +372,7 @@ public class Backstab : MonoBehaviour {
 		}
 	}
 
-	private void TryAddBroadcaster (string ip, int port, string message) {
+	public void TryAddBroadcaster (string ip, int port, string message) {
 		foreach (ConnectionData b in broadcasters) {
 			if (b.address == ip && b.port == port) {
 				b.message = message;
@@ -346,6 +399,7 @@ public class Backstab : MonoBehaviour {
 		UnityEngine.Networking.Types.NodeID nodeId;
 		byte error;
 		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out port, out netId, out nodeId, out error);
+
 		if (error == (byte)NetworkError.Ok) {
 			return new ConnectionData(address, port);
 		} else {
