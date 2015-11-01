@@ -30,9 +30,13 @@
 
 using UnityEngine;
 using UnityEngine.Networking;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+//Used for broadcast discovery
+using System.Net;
+using System.Net.Sockets;
 
 [System.Serializable]
 public class RpcData {
@@ -104,6 +108,12 @@ public class Backstab : MonoBehaviour {
 	[ReadOnly] public int recievedSize;
 	[ReadOnly] public byte recError;
 	
+	private IPAddress broadcastAddress = IPAddress.Parse("224.0.0.224");
+	public int broadcastPort = 8889;
+
+	private UdpClient broadcastClient;
+	private IPEndPoint remoteEnd;
+
 	//Basic functions
 
 	public static void Quit () {
@@ -124,7 +134,7 @@ public class Backstab : MonoBehaviour {
 			//NetworkTransport.StartSendMulticast(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
 
 			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
-			Discovery.Instance.StartBroadcast();
+			StartBroadcast();
 
 			foreach (NetScript inst in NetScript.instances) inst.OnBackstabStartServer();
 		} else {
@@ -143,7 +153,7 @@ public class Backstab : MonoBehaviour {
 			//byte error;
 			//NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
 			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
-			Discovery.Instance.StartListening();
+			StartListeningForBroadcast();
 
 			foreach (NetScript inst in NetScript.instances) {
 				inst.OnBackstabStartClient();
@@ -247,6 +257,37 @@ public class Backstab : MonoBehaviour {
 	static void GetRpc (RpcData rpc) {
 		NetScript inst = NetScript.instances[rpc.sceneId];
 		inst.RecieveRpc(rpc);
+	}
+
+	//Broadcast Discovery
+	
+	public void StartBroadcast () {
+		broadcastClient = new UdpClient();
+		broadcastClient.JoinMulticastGroup(broadcastAddress);
+		remoteEnd = new IPEndPoint(broadcastAddress, broadcastPort);
+		InvokeRepeating("Broadcast", 0, 1);
+	}
+
+	void Broadcast () {
+		byte[] buffer = Serialize(broadcastMessage);
+		broadcastClient.Send(buffer, buffer.Length, remoteEnd);
+	}
+
+	void StopBroadcast () {
+		CancelInvoke("Broadcast");
+	}
+
+	private void StartListeningForBroadcast () {
+		remoteEnd = new IPEndPoint(IPAddress.Any, broadcastPort);
+		broadcastClient = new UdpClient(remoteEnd);
+		broadcastClient.JoinMulticastGroup(broadcastAddress);
+		broadcastClient.BeginReceive(new AsyncCallback(GotBroadcastCallback), null);
+	}
+
+	void GotBroadcastCallback (IAsyncResult ar) {
+		string recMessage = Deserialize(broadcastClient.EndReceive(ar, ref remoteEnd)).ToString();
+		string recServerIp = remoteEnd.Address.ToString();
+		TryAddBroadcaster(recServerIp, broadcastPort, recMessage);
 	}
 	
 	//Private functions

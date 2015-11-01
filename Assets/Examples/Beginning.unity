@@ -926,6 +926,7 @@ MonoBehaviour:
   recChannelId: 0
   recievedSize: 0
   recError: 0
+  broadcastPort: 8889
 --- !u!4 &1481381111
 Transform:
   m_ObjectHideFlags: 0
@@ -1048,50 +1049,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
---- !u!1 &1568044685
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 1568044687}
-  - 114: {fileID: 1568044686}
-  m_Layer: 0
-  m_Name: Discovery
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1568044686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1568044685}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24e286a65236a4e2e95a35108871becd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ipAddress: 224.0.0.224
-  multicastPort: 8889
-  message: asoiofsaifhiadhfs
-  recServerIp: 
-  recMessage: 
---- !u!4 &1568044687
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1568044685}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -81.3220215, y: 134.605957, z: -252.010025}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 9
 --- !u!1 &1617557220
 GameObject:
   m_ObjectHideFlags: 0
