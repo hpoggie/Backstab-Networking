@@ -18,8 +18,8 @@ public class NetRigidbody : NetScript {
 		}
 	}
 	
-	[Client] public void SyncPosition (float x, float y, float z) { transform.position = new Vector3(x, y, z); }
-	[Client] public void SyncRotation (float x, float y, float z) { transform.rotation = Quaternion.Euler(x, y, z); }
-	[Client] public void SyncVelocity (float x, float y, float z) { GetComponent<Rigidbody>().velocity = new Vector3(x, y, z); }
-	[Client] public void SyncAngularVelocity (float x, float y, float z) { GetComponent<Rigidbody>().angularVelocity = new Vector3(x, y, z); }
+	[RpcClients] public void SyncPosition (float x, float y, float z) { transform.position = new Vector3(x, y, z); }
+	[RpcClients] public void SyncRotation (float x, float y, float z) { transform.rotation = Quaternion.Euler(x, y, z); }
+	[RpcClients] public void SyncVelocity (float x, float y, float z) { GetComponent<Rigidbody>().velocity = new Vector3(x, y, z); }
+	[RpcClients] public void SyncAngularVelocity (float x, float y, float z) { GetComponent<Rigidbody>().angularVelocity = new Vector3(x, y, z); }
 }

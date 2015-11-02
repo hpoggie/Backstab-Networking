@@ -11,7 +11,7 @@ public class NetworkLevelLoader : NetScript {
 		Rpc("LoadLevel", level);
 	}
 
-	[Client]
+	[RpcClients]
 	void LoadLevel (int level) {
 		Application.LoadLevel(level);
 	}

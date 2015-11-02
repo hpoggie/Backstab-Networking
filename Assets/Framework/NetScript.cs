@@ -15,8 +15,8 @@ public class RpcAttribute : Attribute {
 	public RpcAttribute () { }
 	public RpcAttribute (QosType qosType) { this.qosType = qosType; }
 }
-public class ServerAttribute : RpcAttribute { }
-public class ClientAttribute : RpcAttribute { }
+public class RpcClientsAttribute : RpcAttribute { }
+public class RpcServerAttribute : RpcAttribute { }
 
 public class NetScript : MonoBehaviour {
 	public static int currentId = 0;

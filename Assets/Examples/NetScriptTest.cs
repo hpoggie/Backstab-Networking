@@ -77,17 +77,17 @@ public class NetScriptTest : NetScript {
 	
 	//Rpcs
 	
-	[Client]
+	[RpcClients]
 	public void GetServerOk () {
 		boxMessage = "Got OK from server.";
 	}
 	
-	[Client]
+	[RpcClients]
 	public void FlipMessageA () {
 		Debug.Log("Got message A. This should be first.");
 	}
 	
-	[Client]
+	[RpcClients]
 	public void FlipMessageB () {
 		Debug.Log("Got message B. This should be second.");
 	}
