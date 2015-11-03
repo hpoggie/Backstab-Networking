@@ -127,7 +127,7 @@ public class NetScript : MonoBehaviour {
 		RpcServer(index, qosType, args);
 	}
 
-	protected void Rpc (string fname, int connectionId, params object[] args) {
+	protected void RpcSpecific (string fname, int connectionId, params object[] args) {
 		byte index = GetMethodIndex(fname);
 		QosType qosType = QosType.Reliable;
 
@@ -163,8 +163,13 @@ public class NetScript : MonoBehaviour {
 				return;
 			}
 		}
-
-		m.Invoke(this, rpc.args);
+		
+		try {
+			m.Invoke(this, rpc.args);
+		} catch (TargetParameterCountException e) {
+			Debug.LogError(e.ToString());
+			Debug.LogError("Exception when attempting to call " +m.Name + " Expected " +m.GetParameters().Length + " Actual " +rpc.args.Length);
+		}
 	}
 
 	public byte GetMethodIndex (string s) {
