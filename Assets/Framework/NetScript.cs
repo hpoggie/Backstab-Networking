@@ -89,8 +89,8 @@ public class NetScript : MonoBehaviour {
 		foreach (Attribute a in rpcs[index].GetCustomAttributes(true)) {
 			if (a is RpcAttribute) {
 				qosType = (a as RpcAttribute).qosType;
-				if (a is ServerAttribute) isClient = true;
-				else if (a is ClientAttribute) isServer = true;
+				if (a is RpcServerAttribute) isClient = true;
+				else if (a is RpcClientsAttribute) isServer = true;
 			}
 		}
 
