@@ -5,6 +5,9 @@ public class BackstabGUI : NetScript {
 
 	public string ipAddress;
 
+	public int nextLevel;
+	public NetworkLevelLoader levelLoader;
+
 	void OnGUI () {
 		if (backstab != null) {
 			GUILayout.Box("Your socket ID is " +backstab.LocalSocketId);
@@ -29,6 +32,8 @@ public class BackstabGUI : NetScript {
 			if (GUILayout.Button("Connect")) {
 				backstab.Connect(ipAddress);
 			}
+
+			if (GUILayout.Button("Load Level")) levelLoader.AllLoadLevel(nextLevel);
 		}
 	}
 
