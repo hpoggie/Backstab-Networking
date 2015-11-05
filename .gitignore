@@ -1,3 +1,6 @@
+# Special settings for Backstab to play well in other projects.
+/*.meta
+
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
