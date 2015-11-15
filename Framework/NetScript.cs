@@ -52,6 +52,11 @@ public class NetScript : MonoBehaviour {
 	
 	void OnDestroy () {
 		instances.Remove(this);
+		foreach (NetScript n in instances) {
+			if (n.viewId > viewId) {
+				n.viewId--;
+			}
+		}
 	}
 	
 	public virtual void OnBackstabStartServer () { ; }
@@ -178,6 +183,7 @@ public class NetScript : MonoBehaviour {
 	}
 
 	public static NetScript Find (int viewId) {
-		return instances[viewId];
+		if (viewId > instances.Count || viewId < 0) return null;
+		else return instances[viewId];
 	}
 }
