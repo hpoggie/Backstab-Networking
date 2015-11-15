@@ -136,7 +136,7 @@ public class Backstab : MonoBehaviour {
 			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
 			StartBroadcast();
 
-			foreach (NetScript inst in NetScript.instances) inst.OnBackstabStartServer();
+			foreach (NetScript inst in NetScript.Instances) inst.OnBackstabStartServer();
 		} else {
 			Debug.LogError("Can't become a server if already server or client.");
 		}
@@ -155,7 +155,7 @@ public class Backstab : MonoBehaviour {
 			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
 			StartListeningForBroadcast();
 
-			foreach (NetScript inst in NetScript.instances) {
+			foreach (NetScript inst in NetScript.Instances) {
 				inst.OnBackstabStartClient();
 			}
 		}
@@ -198,7 +198,7 @@ public class Backstab : MonoBehaviour {
 		NetworkTransport.Init();
 		isServer = false;
 		isClient = false;
-		foreach (NetScript inst in NetScript.instances) {
+		foreach (NetScript inst in NetScript.Instances) {
 			inst.OnBackstabStopServer();
 		}
 	}
@@ -255,7 +255,7 @@ public class Backstab : MonoBehaviour {
 	//Recieving
 
 	static void GetRpc (RpcData rpc) {
-		NetScript inst = NetScript.instances[rpc.sceneId];
+		NetScript inst = NetScript.Instances[rpc.sceneId];
 		inst.RecieveRpc(rpc);
 	}
 
@@ -316,12 +316,12 @@ public class Backstab : MonoBehaviour {
 						numConnections++;
 						if (isServer) {
 							clientConnectionIds[numConnections] = recSocketId;
-							foreach (NetScript inst in NetScript.instances) {
+							foreach (NetScript inst in NetScript.Instances) {
 								inst.OnBackstabClientConnected(data);
 							}
 						} else if (isClient) {
 							serverConnectionId = recConnectionId;
-							foreach (NetScript inst in NetScript.instances) {
+							foreach (NetScript inst in NetScript.Instances) {
 								inst.OnBackstabConnectedToServer(data);
 							}
 							//Debug.Log("Connection failed.");
@@ -329,7 +329,7 @@ public class Backstab : MonoBehaviour {
 							Debug.LogError("Can't connect if neither server nor client.");
 						}
 					} else {
-						foreach (NetScript inst in NetScript.instances) {
+						foreach (NetScript inst in NetScript.Instances) {
 							inst.OnBackstabFailedToConnect();
 						}
 					}
@@ -342,11 +342,11 @@ public class Backstab : MonoBehaviour {
 					break;
 				case NetworkEventType.DisconnectEvent:
 					if (isServer) {
-						foreach (NetScript inst in NetScript.instances) {
+						foreach (NetScript inst in NetScript.Instances) {
 							inst.OnBackstabClientDisconnected();
 						}
 					} else {
-						foreach (NetScript inst in NetScript.instances) {
+						foreach (NetScript inst in NetScript.Instances) {
 							inst.OnBackstabDisconnectedFromServer();
 						}
 					}
@@ -361,7 +361,7 @@ public class Backstab : MonoBehaviour {
 					NetworkTransport.GetBroadcastConnectionMessage(localSocketId, buffer, buffer.Length, out recievedSize, out error);
 					string message = (string)Deserialize(buffer);
 					TryAddBroadcaster(address, port, message);
-					foreach (NetScript inst in NetScript.instances) {
+					foreach (NetScript inst in NetScript.Instances) {
 						inst.OnBackstabGotBroadcast();
 					}
 					break;

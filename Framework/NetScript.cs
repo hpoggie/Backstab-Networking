@@ -20,8 +20,8 @@ public class RpcAllAttribute : RpcAttribute { }
 public class RpcServerAttribute : RpcAttribute { }
 
 public class NetScript : MonoBehaviour {
-	public static int currentId = 0;
-	public static List<NetScript> instances = new List<NetScript>();
+	private static List<NetScript> instances = new List<NetScript>();
+	public static List<NetScript> Instances { get { return instances; } }
 	public static float syncInterval = 0.1f;
 	
 	public Backstab backstab;
@@ -34,10 +34,9 @@ public class NetScript : MonoBehaviour {
 	private BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
 	void Awake () {
+		viewId = instances.Count;
 		instances.Add(this);
 		if (!backstab) backstab = FindObjectOfType<Backstab>();
-		viewId = currentId;
-		currentId++;
 		
 		foreach (MethodInfo m in GetType().GetMethods(flags)) {
 			foreach (Attribute a in m.GetCustomAttributes(true)) {
@@ -177,5 +176,8 @@ public class NetScript : MonoBehaviour {
 		Debug.LogError("Method not found. Defaulting to first method in array.");
 		return 0;
 	}
-	
+
+	public NetScript Find (int viewId) {
+		return instances[viewId];
+	}
 }
