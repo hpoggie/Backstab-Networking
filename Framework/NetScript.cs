@@ -16,6 +16,7 @@ public class RpcAttribute : Attribute {
 	public RpcAttribute (QosType qosType) { this.qosType = qosType; }
 }
 public class RpcClientsAttribute : RpcAttribute { }
+public class RpcAllAttribute : RpcAttribute { }
 public class RpcServerAttribute : RpcAttribute { }
 
 public class NetScript : MonoBehaviour {
@@ -82,26 +83,20 @@ public class NetScript : MonoBehaviour {
 
 	protected void Rpc (string fname, params System.Object[] args) {
 		byte index = GetMethodIndex(fname);
-		bool isServer = false;
-		bool isClient = false;
 		QosType qosType = QosType.Reliable;
 
 		foreach (Attribute a in rpcs[index].GetCustomAttributes(true)) {
 			if (a is RpcAttribute) {
 				qosType = (a as RpcAttribute).qosType;
-				if (a is RpcServerAttribute) isClient = true;
-				else if (a is RpcClientsAttribute) isServer = true;
+				if (a is RpcServerAttribute && backstab.IsClient) {
+					RpcServer(fname, qosType, args);
+				} else if (a is RpcClientsAttribute && backstab.IsServer) {
+					RpcClients(index, qosType, args);
+				} else if (a is RpcAllAttribute && backstab.IsServer) {
+					rpcs[index].Invoke(this, args);
+					RpcClients(index, qosType, args);
+				}
 			}
-		}
-
-		if (isServer && isClient) {
-			Debug.LogError("Can't be both server and client.");
-		} else if (!isServer && !isClient) {
-			Debug.LogError("Trying to send an Rpc when not server or client.");
-		} else if (isServer) {
-			RpcClients(index, qosType, args);
-		} else if (isClient) {
-			RpcServer(fname, qosType, args);
 		}
 	}
 
