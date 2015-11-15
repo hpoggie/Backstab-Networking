@@ -177,7 +177,7 @@ public class NetScript : MonoBehaviour {
 		return 0;
 	}
 
-	public NetScript Find (int viewId) {
+	public static NetScript Find (int viewId) {
 		return instances[viewId];
 	}
 }
