@@ -336,7 +336,6 @@ public class Backstab : MonoBehaviour {
 							foreach (NetScript inst in NetScript.Instances) {
 								inst.OnBackstabConnectedToServer(data);
 							}
-							//Debug.Log("Connection failed.");
 						} else {
 							Debug.LogError("Can't connect if neither server nor client.");
 						}
@@ -378,7 +377,7 @@ public class Backstab : MonoBehaviour {
 					}
 					break;
 				default:
-					Debug.Log("Unrecognized event type");
+					Debug.LogError("Unrecognized event type");
 					break;
 			}
 		}
