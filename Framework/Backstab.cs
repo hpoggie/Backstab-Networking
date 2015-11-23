@@ -69,7 +69,12 @@ public class ConnectionData {
 [System.Serializable]
 public class ChannelData {
 	public QosType qosType;
-	[ReadOnly] public int id;
+	public int id;
+
+	public ChannelData (QosType qosType, int id) {
+		this.qosType = qosType;
+		this.id = id;
+	}
 }
 
 public class Backstab : MonoBehaviour {
@@ -94,6 +99,7 @@ public class Backstab : MonoBehaviour {
 	public int NumConnections { get { return numConnections; } }
 	private int attemptConnectionId = -108; //The ID of the connection most recently attempted.
 
+	[ReadOnly]
 	public ChannelData[] channelData;
 
 	private bool isServer;
@@ -294,8 +300,14 @@ public class Backstab : MonoBehaviour {
 
 	private ConnectionConfig GetConnectionConfig () {
 		ConnectionConfig config = new ConnectionConfig();
-		foreach (ChannelData d in channelData) { d.id = config.AddChannel(d.qosType); }
+		List<ChannelData> cd = new List<ChannelData>();
+
+		foreach (QosType q in Enum.GetValues(typeof(QosType))) {
+			cd.Add(new ChannelData(q, config.AddChannel(q)));
+		}
+
 		ConnectionConfig.Validate(config);
+		channelData = cd.ToArray();
 		return config;
 	}
 
