@@ -112,7 +112,7 @@ public class Backstab : MonoBehaviour {
 	[ReadOnly] public int recConnectionId;
 	[ReadOnly] public int recChannelId;
 	[ReadOnly] public int recievedSize;
-	[ReadOnly] public byte recError;
+	[ReadOnly] public NetworkError recError;
 	
 	private IPAddress broadcastAddress = IPAddress.Parse("224.0.0.224");
 	public int broadcastPort = 8889;
@@ -317,13 +317,16 @@ public class Backstab : MonoBehaviour {
 
 		while (rEvent != NetworkEventType.Nothing) {
 			
-			rEvent = NetworkTransport.Receive(out recSocketId, out recConnectionId, out recChannelId, buffer, buffer.Length, out recievedSize, out recError);
+			byte rError;
+			rEvent = NetworkTransport.Receive(out recSocketId, out recConnectionId, out recChannelId, buffer, buffer.Length, out recievedSize, out rError);
+			recError = (NetworkError)rError;
 			
 			switch (rEvent) {
 				case NetworkEventType.Nothing:
 					break;
 				case NetworkEventType.ConnectEvent:
-					if (recSocketId == localSocketId && recConnectionId == attemptConnectionId && recError == (byte)NetworkError.Ok) {
+					bool unexpectedConnection = isClient && recConnectionId != attemptConnectionId;
+					if (recSocketId == localSocketId && !unexpectedConnection && recError == NetworkError.Ok) {
 						ConnectionData data = GetConnectionData(recConnectionId);
 						numConnections++;
 						if (isServer) {
@@ -340,6 +343,9 @@ public class Backstab : MonoBehaviour {
 							Debug.LogError("Can't connect if neither server nor client.");
 						}
 					} else {
+						Debug.Log(string.Format("recieved socket id: {0} expected socket id: {1}", recSocketId, localSocketId));
+						//Debug.Log(string.Format("recieved connection id: {0} expected connection id: {1}", recConnectionId, attemptConnectionId));
+
 						foreach (NetScript inst in NetScript.Instances) {
 							inst.OnBackstabFailedToConnect();
 						}
