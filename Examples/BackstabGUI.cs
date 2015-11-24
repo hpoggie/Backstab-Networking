@@ -18,6 +18,8 @@ public class BackstabGUI : NetScript {
 			} else if (backstab.IsClient) {
 				GUILayout.Box("Client active.");
 			} else {
+				if (GUILayout.Button("Start Server")) backstab.StartServer();
+				if (GUILayout.Button("Start Client")) backstab.StartClient();
 				GUILayout.Box("Not server or client.");
 			}
 			
