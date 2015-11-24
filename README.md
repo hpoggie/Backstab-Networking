@@ -21,7 +21,10 @@ In order to send an RPC, it must have an Rpc attribute. There are two kinds of R
 Like so:
 
 <code>
-[Server] public void MyFunction (int foo) { Debug.Log(foo); } //Sends an integer message to the server
+[RpcServer]
+public void MyFunction (int foo) {
+  Debug.Log(foo); //Sends an integer message to the server
+}
 </code>
 
 To actually send an RPC, you would do something like Rpc("MyFunction", args).
@@ -35,7 +38,7 @@ When you start a server, Backstab will start broadcasting on your LAN. Any clien
 
 Backstab.broadcasters holds a list of all servers from whom broadcasts were recieved.
 
+NOTE: Backstab's broadcast discovery is not based on UNET, because UNET's discovery doesn't work on Linux for some reason.
+
 #Future Updates
 I may add the ability to overload RPCs in the future. The problem is that NetScript would have to match the argument list at runtime, which is kind of slow. I will do a load test and see whether it's a big performance draw.
-
-Also, broadcasting doesn't work on Linux for some reason. I have no idea why.
