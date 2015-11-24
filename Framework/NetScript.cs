@@ -93,7 +93,7 @@ public class NetScript : MonoBehaviour {
 			if (a is RpcAttribute) {
 				qosType = (a as RpcAttribute).qosType;
 				if (a is RpcServerAttribute && backstab.IsClient) {
-					RpcServer(fname, qosType, args);
+					RpcServer(index, qosType, args);
 				} else if (a is RpcClientsAttribute && backstab.IsServer) {
 					RpcClients(index, qosType, args);
 				} else if (a is RpcAllAttribute && backstab.IsServer) {
@@ -103,7 +103,7 @@ public class NetScript : MonoBehaviour {
 			}
 		}
 	}
-
+	
 	protected void RpcClients (string fname, params object[] args) {
 		byte index = GetMethodIndex(fname);
 		QosType qosType = QosType.Reliable;
@@ -125,7 +125,7 @@ public class NetScript : MonoBehaviour {
 		
 		RpcServer(index, qosType, args);
 	}
-
+	
 	protected void RpcSpecific (string fname, int connectionId, params object[] args) {
 		byte index = GetMethodIndex(fname);
 		QosType qosType = QosType.Reliable;
