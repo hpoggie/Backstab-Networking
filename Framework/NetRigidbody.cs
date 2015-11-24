@@ -6,20 +6,36 @@
  */
 
 using UnityEngine;
-using System.Collections;
+
+[System.Serializable]
+public class NetVector3 {
+	public float x;
+	public float y;
+	public float z;
+
+	public NetVector3 (Vector3 v) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+	}
+
+	public Vector3 Get () {
+		return new Vector3(x, y, z);
+	}
+}
 
 public class NetRigidbody : NetScript {
 	protected override void OnSync () {
 		if (backstab.IsServer) {
-			Rpc("SyncPosition", transform.position.x, transform.position.y, transform.position.z);
-			Rpc("SyncRotation", transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
-			Rpc("SyncVelocity", GetComponent<Rigidbody>().velocity.x, GetComponent<Rigidbody>().velocity.y, GetComponent<Rigidbody>().velocity.z);
-			Rpc("SyncAngularVelocity", GetComponent<Rigidbody>().angularVelocity.x, GetComponent<Rigidbody>().angularVelocity.y, GetComponent<Rigidbody>().angularVelocity.z);
+			Rpc("SyncPosition", new NetVector3(transform.position));
+			Rpc("SyncRotation", new NetVector3(transform.rotation.eulerAngles));
+			Rpc("SyncVelocity", new NetVector3(GetComponent<Rigidbody>().velocity));
+			Rpc("SyncAngularVelocity", new NetVector3(GetComponent<Rigidbody>().angularVelocity));
 		}
 	}
 	
-	[RpcClients] public void SyncPosition (float x, float y, float z) { transform.position = new Vector3(x, y, z); }
-	[RpcClients] public void SyncRotation (float x, float y, float z) { transform.rotation = Quaternion.Euler(x, y, z); }
-	[RpcClients] public void SyncVelocity (float x, float y, float z) { GetComponent<Rigidbody>().velocity = new Vector3(x, y, z); }
-	[RpcClients] public void SyncAngularVelocity (float x, float y, float z) { GetComponent<Rigidbody>().angularVelocity = new Vector3(x, y, z); }
+	[RpcClients] public void SyncPosition (NetVector3 pos) { transform.position = pos.Get(); }
+	[RpcClients] public void SyncRotation (NetVector3 rot) { transform.rotation = Quaternion.Euler(rot.Get()); }
+	[RpcClients] public void SyncVelocity (NetVector3 v) { GetComponent<Rigidbody>().velocity = v.Get(); }
+	[RpcClients] public void SyncAngularVelocity (NetVector3 av) { GetComponent<Rigidbody>().angularVelocity = av.Get(); }
 }
