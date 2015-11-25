@@ -18,6 +18,7 @@ public class RpcAttribute : Attribute {
 public class RpcClientsAttribute : RpcAttribute { }
 public class RpcAllAttribute : RpcAttribute { }
 public class RpcServerAttribute : RpcAttribute { }
+public class InputCommandAttribute : RpcAttribute { }
 
 public class NetScript : MonoBehaviour {
 	private static List<NetScript> instances = new List<NetScript>();
@@ -99,6 +100,11 @@ public class NetScript : MonoBehaviour {
 				} else if (a is RpcAllAttribute && backstab.IsServer) {
 					rpcs[index].Invoke(this, args);
 					RpcClients(index, qosType, args);
+				} else if (a is InputCommandAttribute && backstab.IsServer) {
+					rpcs[index].Invoke(this, args);
+					RpcClients(index, qosType, args);
+				} else if (a is InputCommandAttribute && backstab.IsClient) {
+					RpcServer(index, qosType, args);
 				}
 			}
 		}
