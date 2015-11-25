@@ -154,11 +154,11 @@ public class NetScript : MonoBehaviour {
 
 		foreach (Attribute a in m.GetCustomAttributes(true)) {
 			if (a is RpcServerAttribute && !backstab.IsServer) {
-				Debug.LogError("Can't recieve server Rpcs if not the server.");
+				Debug.LogError("Can't recieve server Rpcs if not the server. " +m.Name);
 				return;
 			}
 			if (a is RpcClientsAttribute && !backstab.IsClient) {
-				Debug.LogError("Can't recieve client Rpcs if not a client.");
+				Debug.LogError("Can't recieve client Rpcs if not a client. " +m.Name);
 				return;
 			}
 		}
