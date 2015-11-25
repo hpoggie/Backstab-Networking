@@ -157,6 +157,7 @@ public class NetScript : MonoBehaviour {
 
 	public void RecieveRpc (RpcData rpc) {
 		MethodInfo m = rpcs[rpc.methodId];
+		InputCommandAttribute attr = null;
 
 		foreach (Attribute a in m.GetCustomAttributes(true)) {
 			if (a is RpcServerAttribute && !backstab.IsServer) {
@@ -167,6 +168,9 @@ public class NetScript : MonoBehaviour {
 				Debug.LogError("Can't recieve client Rpcs if not a client. " +m.Name);
 				return;
 			}
+			if (a is InputCommandAttribute && backstab.IsServer) {
+				attr = (a as InputCommandAttribute);
+			}
 		}
 		
 		try {
@@ -174,6 +178,10 @@ public class NetScript : MonoBehaviour {
 		} catch (TargetParameterCountException e) {
 			//Debug.LogError(e.ToString());
 			Debug.LogError("Exception when attempting to call " +m.Name + " Expected " +m.GetParameters().Length + " parameters; Actual " +rpc.args.Length);
+		}
+
+		if (attr != null) {
+			RpcClients(rpc.methodId, attr.qosType, rpc.args);
 		}
 	}
 
