@@ -95,6 +95,8 @@ public class NetScript : MonoBehaviour {
 				qosType = (a as RpcAttribute).qosType;
 				if (a is RpcServerAttribute && backstab.IsClient) {
 					RpcServer(index, qosType, args);
+				} else if (a is RpcServerAttribute && backstab.IsServer) {
+					rpcs[index].Invoke(this, args);
 				} else if (a is RpcClientsAttribute && backstab.IsServer) {
 					RpcClients(index, qosType, args);
 				} else if (a is RpcAllAttribute && backstab.IsServer) {
