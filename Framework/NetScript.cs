@@ -176,8 +176,9 @@ public class NetScript : MonoBehaviour {
 		try {
 			m.Invoke(this, rpc.args);
 		} catch (TargetParameterCountException e) {
-			//Debug.LogError(e.ToString());
-			Debug.LogError("Exception when attempting to call " +m.Name + " Expected " +m.GetParameters().Length + " parameters; Actual " +rpc.args.Length);
+			Debug.LogError(e.GetType().ToString() + " when attempting to call " +m.Name + " Expected " +m.GetParameters().Length + " parameters; Actual " +rpc.args.Length);
+		} catch (Exception e) {
+			Debug.Log(e.GetType().ToString() + " when attempting to call " +m.Name);
 		}
 
 		if (attr != null) {
