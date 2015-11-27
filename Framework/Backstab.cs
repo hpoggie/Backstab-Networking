@@ -261,7 +261,7 @@ public class Backstab : MonoBehaviour {
 	//Recieving
 
 	static void GetRpc (RpcData rpc) {
-		NetScript inst = NetScript.Instances[rpc.sceneId];
+		NetScript inst = NetScript.Find(rpc.sceneId);
 		inst.RecieveRpc(rpc);
 	}
 
