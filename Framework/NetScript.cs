@@ -73,6 +73,8 @@ public class NetScript : MonoBehaviour {
 	public virtual void OnBackstabGotBroadcast () { ; }
 	protected virtual void OnSync () { ; }
 
+	public virtual void OnNetworkLoadedLevel (int level) { ; }
+
 	//Registering
 
 	private void RegisterRpc (MethodInfo method) {
@@ -98,9 +100,11 @@ public class NetScript : MonoBehaviour {
 				} else if (a is RpcClientsAttribute && backstab.IsServer) {
 					RpcClients(index, qosType, args);
 				} else if (a is RpcAllAttribute && backstab.IsServer) {
+					backstab.recConnectionId = 0;
 					rpcs[index].Invoke(this, args);
 					RpcClients(index, qosType, args);
 				} else if (a is InputCommandAttribute && backstab.IsServer) {
+					backstab.recConnectionId = 0;
 					rpcs[index].Invoke(this, args);
 					RpcClients(index, qosType, args);
 				} else if (a is InputCommandAttribute && backstab.IsClient) {
@@ -199,7 +203,7 @@ public class NetScript : MonoBehaviour {
 	}
 
 	public static NetScript Find (int viewId) {
-		if (viewId > instances.Count || viewId < 0) return null;
+		if (viewId >= instances.Count || viewId < 0) return null;
 		else return instances[viewId];
 	}
 }
