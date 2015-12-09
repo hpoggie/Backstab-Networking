@@ -90,6 +90,7 @@ public class Backstab : MonoBehaviour {
 	public int broadcastSubVersion = 0;
 	public string broadcastMessage = "Hello!";
 	public List<ConnectionData> broadcasters = new List<ConnectionData>();
+	private int broadcastSocket = 0;
 
 	private int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
 	public int LocalSocketId { get { return localSocketId; } }
@@ -134,13 +135,14 @@ public class Backstab : MonoBehaviour {
 			
 			isServer = true;
 			
-			//byte[] m = Serialize(broadcastMessage);
-			//byte error;
-			//NetworkTransport.StartBroadcastDiscovery(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
-			//NetworkTransport.StartSendMulticast(localSocketId, port, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
+			broadcastSocket = NetworkTransport.AddHost(topology, 0);
+			byte[] m = Serialize(broadcastMessage);
+			byte error;
+			NetworkTransport.StartBroadcastDiscovery(broadcastSocket, broadcastPort, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
+			//NetworkTransport.StartSendMulticast(localSocketId, broadcastPort, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
 
-			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
-			StartBroadcast();
+			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
+			//StartBroadcast();
 
 			foreach (NetScript inst in NetScript.Instances) inst.OnBackstabStartServer();
 		} else {
@@ -156,10 +158,11 @@ public class Backstab : MonoBehaviour {
 
 			isClient = true;
 
-			//byte error;
-			//NetworkTransport.SetBroadcastCredentials(localSocketId, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
-			//if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
-			StartListeningForBroadcast();
+			byte error;
+			broadcastSocket = NetworkTransport.AddHost(new HostTopology(GetConnectionConfig(), 1), broadcastPort);
+			NetworkTransport.SetBroadcastCredentials(broadcastSocket, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
+			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
+			//StartListeningForBroadcast();
 
 			foreach (NetScript inst in NetScript.Instances) {
 				inst.OnBackstabStartClient();
@@ -371,11 +374,11 @@ public class Backstab : MonoBehaviour {
 					break;
 				case NetworkEventType.BroadcastEvent:
 					string address;
-					int port;
+					int recPort;
 					byte error;
-					NetworkTransport.GetBroadcastConnectionInfo(localSocketId, out address, out port, out error);
+					NetworkTransport.GetBroadcastConnectionInfo(broadcastSocket, out address, out recPort, out error);
 					if (error != (byte)NetworkError.Ok) Debug.Log("Recieved broadcast from bad connection.");
-					NetworkTransport.GetBroadcastConnectionMessage(localSocketId, buffer, buffer.Length, out recievedSize, out error);
+					NetworkTransport.GetBroadcastConnectionMessage(broadcastSocket, buffer, buffer.Length, out recievedSize, out error);
 					string message = (string)Deserialize(buffer);
 					TryAddBroadcaster(address, port, message);
 					foreach (NetScript inst in NetScript.Instances) {
@@ -401,21 +404,21 @@ public class Backstab : MonoBehaviour {
 
 	public bool IsConnectionOk (int i) {
 		string address;
-		int port;
+		int recPort;
 		UnityEngine.Networking.Types.NetworkID netId;
 		UnityEngine.Networking.Types.NodeID nodeId;
 		byte error;
-		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out port, out netId, out nodeId, out error);
+		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out recPort, out netId, out nodeId, out error);
 		return error == (byte)NetworkError.Ok;
 	}
 
 	public ConnectionData GetConnectionData (int i) {
 		string address;
-		int port;
+		int recPort;
 		UnityEngine.Networking.Types.NetworkID netId;
 		UnityEngine.Networking.Types.NodeID nodeId;
 		byte error;
-		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out port, out netId, out nodeId, out error);
+		NetworkTransport.GetConnectionInfo(localSocketId, i, out address, out recPort, out netId, out nodeId, out error);
 
 		if (error == (byte)NetworkError.Ok) {
 			return new ConnectionData(address, port);
