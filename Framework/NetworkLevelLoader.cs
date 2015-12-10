@@ -5,12 +5,15 @@ public class NetworkLevelLoader : NetScript {
 
 	bool[] status;
 
+	public void Start () {
+		DontDestroyOnLoad(this);
+	}
+
 	public void AllLoadLevel (int level) {
 		if (!backstab.IsServer) {
 			Debug.LogError("Can't issue LoadLevel messages if not the server.");
 			return;
 		}
-		DontDestroyOnLoad(this);
 		status = new bool[backstab.NumConnections+1];
 		Rpc("LoadLevel", level);
 	}
@@ -20,6 +23,9 @@ public class NetworkLevelLoader : NetScript {
 		Application.LoadLevel(level);
 		if (backstab.IsClient) {
 			Rpc("OnClientFinishedLoading");
+		} else {
+			backstab.recConnectionId = 0;
+			OnClientFinishedLoading();
 		}
 		lastLevel = level;
 	}
