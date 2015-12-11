@@ -73,7 +73,6 @@ public class NetScript : MonoBehaviour {
 	public virtual void OnBackstabGotBroadcast () { ; }
 	protected virtual void OnSync () { ; }
 
-	public virtual void OnSpawn () { ; }
 	public virtual void OnNetworkLoadedLevel (int level) { ; }
 
 	//Registering
