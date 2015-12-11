@@ -43,8 +43,9 @@ public class NetworkLevelLoader : NetScript {
 
 	[RpcAll]
 	public void OnLoadingFinished (int level) {
-		foreach (NetScript n in NetScript.Instances) {
-			n.OnNetworkLoadedLevel(level);
+		int l = NetScript.Instances.Count;
+		for (int i = 0; i < l; i++) {
+			NetScript.Instances[i].OnNetworkLoadedLevel(level);
 		}
 	}
 }
