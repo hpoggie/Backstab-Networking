@@ -41,10 +41,11 @@ public class NetworkLevelLoader : NetScript {
 		Rpc("OnLoadingFinished", lastLevel);
 	}
 
+	//NOTE: Use OnNetworkLoadedLevel only if you're sure you need it.
+	//If you spawn a NetScript that spawns more of itself, this loop will never terminate.
 	[RpcAll]
 	public void OnLoadingFinished (int level) {
-		int l = NetScript.Instances.Count;
-		for (int i = 0; i < l; i++) {
+		for (int i = 0; i < NetScript.Instances.Count; i++) {
 			NetScript.Instances[i].OnNetworkLoadedLevel(level);
 		}
 	}
