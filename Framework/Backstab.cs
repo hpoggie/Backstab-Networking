@@ -94,10 +94,13 @@ public class Backstab : MonoBehaviour {
 
 	private int localSocketId = 0; //The socket id of this computer. You can have multiple sockets open with NetworkTransport, but Backstab only uses one.
 	public int LocalSocketId { get { return localSocketId; } }
-	private int serverConnectionId;
-	private int[] clientConnectionIds;
-	private int numConnections = 0;
-	public int NumConnections { get { return numConnections; } }
+	private int serverConnectionId = -1;
+	private List<int> clientConnectionIds;
+	public int NumConnections { get {
+		if (isClient && serverConnectionId != -1) return 1;
+		else if (isServer) return clientConnectionIds.Count;
+		else return 0;
+	} }
 	private int attemptConnectionId = -108; //The ID of the connection most recently attempted.
 
 	[ReadOnly]
@@ -107,7 +110,7 @@ public class Backstab : MonoBehaviour {
 	public bool IsServer { get { return isServer; } }
 	private bool isClient;
 	public bool IsClient { get { return isClient; } }
-	public bool IsConnected { get { return numConnections > 0; }  }
+	public bool IsConnected { get { return NumConnections > 0; }  }
 	
 	[ReadOnly] public int recSocketId;
 	[ReadOnly] public int recConnectionId;
@@ -127,9 +130,12 @@ public class Backstab : MonoBehaviour {
 		NetworkTransport.Shutdown();
 	}
 
+	public void Start () {
+	}
+
 	public void StartServer () {
 		if (!isServer && !isClient) {
-			clientConnectionIds = new int[maxConnections];
+			clientConnectionIds = new List<int>();
 			HostTopology topology = new HostTopology(GetConnectionConfig(), maxConnections);
 			localSocketId = NetworkTransport.AddHost(topology, port,  null);
 			
@@ -189,14 +195,13 @@ public class Backstab : MonoBehaviour {
 	public void Disconnect () {
 		byte error;
 		if (isServer) {
-			for (int i = 0; i <= numConnections; i++) {
+			for (int i = 0; i < clientConnectionIds.Count; i++) {
 				NetworkTransport.Disconnect(localSocketId, i, out error);
 			}
 		}
 		if (isClient) {
 			NetworkTransport.Disconnect(localSocketId, serverConnectionId, out error);
 		}
-		numConnections = 0;
 	}
 	
 	//HAAXXX!
@@ -225,7 +230,7 @@ public class Backstab : MonoBehaviour {
 
 	public void RpcAll (int viewId, byte methodId, int channelId, System.Object[] args) {
 		if (isServer) {
-			for (int i = 0; i < clientConnectionIds.Length; i++) {
+			for (int i = 0; i < clientConnectionIds.Count; i++) {
 				if (IsConnectionOk(i)) {
 					Rpc(viewId, methodId, channelId, i, args);
 				}
@@ -331,9 +336,8 @@ public class Backstab : MonoBehaviour {
 					bool unexpectedConnection = isClient && recConnectionId != attemptConnectionId;
 					if (recSocketId == localSocketId && !unexpectedConnection && recError == NetworkError.Ok) {
 						ConnectionData data = GetConnectionData(recConnectionId);
-						numConnections++;
 						if (isServer) {
-							clientConnectionIds[numConnections] = recSocketId;
+							clientConnectionIds.Add(recSocketId);
 							foreach (NetScript inst in NetScript.Instances) {
 								inst.OnBackstabClientConnected(data);
 							}
@@ -362,6 +366,7 @@ public class Backstab : MonoBehaviour {
 					break;
 				case NetworkEventType.DisconnectEvent:
 					if (isServer) {
+						clientConnectionIds.Remove(recConnectionId);
 						foreach (NetScript inst in NetScript.Instances) {
 							inst.OnBackstabClientDisconnected();
 						}
@@ -370,7 +375,6 @@ public class Backstab : MonoBehaviour {
 							inst.OnBackstabDisconnectedFromServer();
 						}
 					}
-					numConnections--;
 					break;
 				case NetworkEventType.BroadcastEvent:
 					string address;
