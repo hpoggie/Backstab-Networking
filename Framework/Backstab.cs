@@ -189,7 +189,7 @@ public class Backstab : MonoBehaviour {
 	public void Disconnect () {
 		byte error;
 		if (isServer) {
-			for (int i = 0; i <= numConnections; i++) {
+			for (int i = 0; i < numConnections; i++) {
 				NetworkTransport.Disconnect(localSocketId, i, out error);
 			}
 		}
@@ -432,6 +432,13 @@ public class Backstab : MonoBehaviour {
 			if (channelData[i].qosType == qtype) {
 				return channelData[i].id;
 			}
+		}
+		return -1;
+	}
+
+	public int GetClientIndex (int connectionId) {
+		for (int i = 0; i < clientConnectionIds.Length; i++) {
+			if (clientConnectionIds[i] == connectionId) return i;
 		}
 		return -1;
 	}
