@@ -331,12 +331,12 @@ public class Backstab : MonoBehaviour {
 					bool unexpectedConnection = isClient && recConnectionId != attemptConnectionId;
 					if (recSocketId == localSocketId && !unexpectedConnection && recError == NetworkError.Ok) {
 						ConnectionData data = GetConnectionData(recConnectionId);
-						numConnections++;
 						if (isServer) {
 							clientConnectionIds[numConnections] = recSocketId;
 							foreach (NetScript inst in NetScript.Instances) {
 								inst.OnBackstabClientConnected(data);
 							}
+							numConnections++;
 						} else if (isClient) {
 							serverConnectionId = recConnectionId;
 							foreach (NetScript inst in NetScript.Instances) {
