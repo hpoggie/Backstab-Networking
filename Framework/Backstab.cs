@@ -115,7 +115,6 @@ public class Backstab : MonoBehaviour {
 	[ReadOnly] public int recievedSize;
 	[ReadOnly] public NetworkError recError;
 	
-	private IPAddress broadcastAddress = IPAddress.Parse("224.0.0.224");
 	public int broadcastPort = 8889;
 
 	private UdpClient broadcastClient;
@@ -142,7 +141,6 @@ public class Backstab : MonoBehaviour {
 			//NetworkTransport.StartSendMulticast(localSocketId, broadcastPort, broadcastKey, broadcastVersion, broadcastSubVersion, m, packetSize, 1000, out error);
 
 			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to start broadcast discovery.");
-			//StartBroadcast();
 
 			foreach (NetScript inst in NetScript.Instances) inst.OnBackstabStartServer();
 		} else {
@@ -268,37 +266,6 @@ public class Backstab : MonoBehaviour {
 		inst.RecieveRpc(rpc);
 	}
 
-	//Broadcast Discovery
-	
-	public void StartBroadcast () {
-		broadcastClient = new UdpClient();
-		broadcastClient.JoinMulticastGroup(broadcastAddress);
-		remoteEnd = new IPEndPoint(broadcastAddress, broadcastPort);
-		InvokeRepeating("Broadcast", 0, 1);
-	}
-
-	void Broadcast () {
-		byte[] buffer = Serialize(broadcastMessage);
-		broadcastClient.Send(buffer, buffer.Length, remoteEnd);
-	}
-
-	void StopBroadcast () {
-		CancelInvoke("Broadcast");
-	}
-
-	private void StartListeningForBroadcast () {
-		remoteEnd = new IPEndPoint(IPAddress.Any, broadcastPort);
-		broadcastClient = new UdpClient(remoteEnd);
-		broadcastClient.JoinMulticastGroup(broadcastAddress);
-		broadcastClient.BeginReceive(new AsyncCallback(GotBroadcastCallback), null);
-	}
-
-	void GotBroadcastCallback (IAsyncResult ar) {
-		string recMessage = Deserialize(broadcastClient.EndReceive(ar, ref remoteEnd)).ToString();
-		string recServerIp = remoteEnd.Address.ToString();
-		TryAddBroadcaster(recServerIp, broadcastPort, recMessage);
-	}
-	
 	//Private functions
 
 	private ConnectionConfig GetConnectionConfig () {
