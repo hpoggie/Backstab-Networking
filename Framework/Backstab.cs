@@ -275,6 +275,7 @@ public class Backstab : MonoBehaviour {
 		foreach (QosType q in Enum.GetValues(typeof(QosType))) {
 			cd.Add(new ChannelData(q, config.AddChannel(q)));
 		}
+		config.MaxSentMessageQueueSize = 256;
 
 		ConnectionConfig.Validate(config);
 		channelData = cd.ToArray();
