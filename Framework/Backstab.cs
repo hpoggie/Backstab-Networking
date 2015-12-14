@@ -84,6 +84,7 @@ public class Backstab : MonoBehaviour {
 	public int port = 8888;
 	public int maxConnections = 10;
 	public int packetSize = 1024;
+	public ushort maxSentMessageQueueSize = 256;
 
 	public int broadcastKey = 1000;
 	public int broadcastVersion = 1;
@@ -275,7 +276,7 @@ public class Backstab : MonoBehaviour {
 		foreach (QosType q in Enum.GetValues(typeof(QosType))) {
 			cd.Add(new ChannelData(q, config.AddChannel(q)));
 		}
-		config.MaxSentMessageQueueSize = 256;
+		config.MaxSentMessageQueueSize = maxSentMessageQueueSize;
 
 		ConnectionConfig.Validate(config);
 		channelData = cd.ToArray();
