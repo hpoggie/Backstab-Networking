@@ -302,10 +302,10 @@ public class Backstab : MonoBehaviour {
 						ConnectionData data = GetConnectionData(recConnectionId);
 						if (isServer) {
 							clientConnectionIds[numConnections] = recSocketId;
+							numConnections++;
 							foreach (NetScript inst in NetScript.Instances) {
 								inst.OnBackstabClientConnected(data);
 							}
-							numConnections++;
 						} else if (isClient) {
 							serverConnectionId = recConnectionId;
 							foreach (NetScript inst in NetScript.Instances) {
