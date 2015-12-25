@@ -126,6 +126,9 @@ public class Backstab : MonoBehaviour {
 	public void StartServer () {
 		if (!isServer && !isClient) {
 			clientConnectionIds = new int[maxConnections];
+			for (int i = 0; i < maxConnections; i++) {
+				clientConnectionIds[i] = -99;
+			}
 			HostTopology topology = new HostTopology(GetConnectionConfig(), maxConnections);
 			localSocketId = NetworkTransport.AddHost(topology, port,  null);
 			
@@ -147,7 +150,6 @@ public class Backstab : MonoBehaviour {
 
 	public void StartClient () {
 		if (!isServer && !isClient) {
-			//clientConnectionIds = new int[0];
 			HostTopology topology = new HostTopology(GetConnectionConfig(), 1);
 			localSocketId = NetworkTransport.AddHost(topology, 0, null);
 
@@ -157,7 +159,6 @@ public class Backstab : MonoBehaviour {
 			broadcastSocket = NetworkTransport.AddHost(new HostTopology(GetConnectionConfig(), 1), broadcastPort);
 			NetworkTransport.SetBroadcastCredentials(broadcastSocket, broadcastKey, broadcastVersion, broadcastSubVersion, out error);
 			if (error != (byte)NetworkError.Ok) Debug.LogError("Failed to set broadcast credentials.");
-			//StartListeningForBroadcast();
 
 			foreach (NetScript inst in NetScript.Instances) {
 				inst.OnBackstabStartClient();
@@ -184,6 +185,7 @@ public class Backstab : MonoBehaviour {
 	public void Disconnect () {
 		byte error;
 		if (isServer) {
+			clientConnectionIds = new int[maxConnections];
 			for (int i = 0; i < numConnections; i++) {
 				NetworkTransport.Disconnect(localSocketId, i, out error);
 			}
@@ -297,7 +299,12 @@ public class Backstab : MonoBehaviour {
 					if (recSocketId == localSocketId && !unexpectedConnection && recError == NetworkError.Ok) {
 						ConnectionData data = GetConnectionData(recConnectionId);
 						if (isServer) {
-							clientConnectionIds[numConnections] = recSocketId;
+							for (int i = 0; i < clientConnectionIds.Length; i++) {
+								if (clientConnectionIds[i] < 0) {
+									clientConnectionIds[i] = recSocketId;
+									break;
+								}
+							}
 							numConnections++;
 							foreach (NetScript inst in NetScript.Instances) {
 								inst.OnBackstabClientConnected(data);
@@ -326,7 +333,9 @@ public class Backstab : MonoBehaviour {
 					}
 					break;
 				case NetworkEventType.DisconnectEvent:
+					numConnections--;
 					if (isServer) {
+						clientConnectionIds[recConnectionId] = -99;
 						foreach (NetScript inst in NetScript.Instances) {
 							inst.OnBackstabClientDisconnected();
 						}
@@ -335,7 +344,6 @@ public class Backstab : MonoBehaviour {
 							inst.OnBackstabDisconnectedFromServer();
 						}
 					}
-					numConnections--;
 					break;
 				case NetworkEventType.BroadcastEvent:
 					string address;
