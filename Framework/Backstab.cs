@@ -82,6 +82,7 @@ public class Backstab : MonoBehaviour {
 	public static bool IsActive { get { return (instances.Count > 0); } }
 
 	public int port = 8888;
+	public int broadcastPort = 8889;
 	public int maxConnections = 10;
 	public int packetSize = 1024;
 	public ushort maxSentMessageQueueSize = 256;
@@ -116,11 +117,6 @@ public class Backstab : MonoBehaviour {
 	[ReadOnly] public int recievedSize;
 	[ReadOnly] public NetworkError recError;
 	
-	public int broadcastPort = 8889;
-
-	private UdpClient broadcastClient;
-	private IPEndPoint remoteEnd;
-
 	//Basic functions
 
 	public static void Quit () {
