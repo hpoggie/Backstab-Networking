@@ -413,6 +413,10 @@ public class Backstab : MonoBehaviour {
 		return -1;
 	}
 
+	public int GetRecClientIndex () {
+		return GetClientIndex(recConnectionId);
+	}
+
 	//Non-static
 
 	void Awake () {
