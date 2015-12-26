@@ -1,18 +1,18 @@
 ﻿/*
  * How to use
- * 
+ *
  * To start a server, call StartServer().
  * To start a client, call StartClient().
  * To connect to a server, call Connect(someIp), where someIp is the ip address of the server.
  * To disconnect or stop the server, call Disconnect().
  * To quit, call Quit().
- * 
+ *
  * Backstab has no SyncVars. Everything must be done from RPCs.
  * RPCs must be done from NetScript components; all your scripts with RPCs must inherit from NetScript.
- * 
+ *
  * Backstab uses UDP, not Websocket.
- * 
- * 
+ *
+ *
  * Settings
  *
  * Port: the port to connect over.
@@ -34,9 +34,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-//Used for broadcast discovery
-using System.Net;
-using System.Net.Sockets;
 
 [System.Serializable]
 public class RpcData {
@@ -110,13 +107,13 @@ public class Backstab : MonoBehaviour {
 	private bool isClient;
 	public bool IsClient { get { return isClient; } }
 	public bool IsConnected { get { return numConnections > 0; }  }
-	
+
 	[ReadOnly] public int recSocketId;
 	[ReadOnly] public int recConnectionId;
 	[ReadOnly] public int recChannelId;
 	[ReadOnly] public int recievedSize;
 	[ReadOnly] public NetworkError recError;
-	
+
 	//Basic functions
 
 	public static void Quit () {
@@ -131,9 +128,9 @@ public class Backstab : MonoBehaviour {
 			}
 			HostTopology topology = new HostTopology(GetConnectionConfig(), maxConnections);
 			localSocketId = NetworkTransport.AddHost(topology, port,  null);
-			
+
 			isServer = true;
-			
+
 			broadcastSocket = NetworkTransport.AddHost(topology, 0);
 			byte[] m = Serialize(broadcastMessage);
 			byte error;
@@ -167,7 +164,7 @@ public class Backstab : MonoBehaviour {
 	}
 
 	public void Connect (string ip) {
-		Connect(ip, port);	
+		Connect(ip, port);
 	}
 
 	//Warning: Minor Black Magic. I do not know what the 4th argument does.
@@ -195,7 +192,7 @@ public class Backstab : MonoBehaviour {
 		}
 		numConnections = 0;
 	}
-	
+
 	//HAAXXX!
 	//Change this when Unity fixes RemoveHost
 	public void StopServer () {
@@ -213,7 +210,7 @@ public class Backstab : MonoBehaviour {
 		byte error;
 		NetworkTransport.Disconnect(localSocketId, index + 1, out error);
 	}
-	
+
 	//Sending
 
 	public void RpcAll (int viewId, byte methodId, QosType qtype, object[] args) {
@@ -286,11 +283,11 @@ public class Backstab : MonoBehaviour {
 		NetworkEventType rEvent = NetworkEventType.DataEvent;
 
 		while (rEvent != NetworkEventType.Nothing) {
-			
+
 			byte rError;
 			rEvent = NetworkTransport.Receive(out recSocketId, out recConnectionId, out recChannelId, buffer, buffer.Length, out recievedSize, out rError);
 			recError = (NetworkError)rError;
-			
+
 			switch (rEvent) {
 				case NetworkEventType.Nothing:
 					break;
