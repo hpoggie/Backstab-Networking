@@ -406,6 +406,10 @@ public class Backstab : MonoBehaviour {
 		return -1;
 	}
 
+	public int GetClientConnectionId (int index) {
+		return clientConnectionIds[index];
+	}
+
 	public int GetClientIndex (int connectionId) {
 		for (int i = 0; i < clientConnectionIds.Length; i++) {
 			if (clientConnectionIds[i] == connectionId) return i;
