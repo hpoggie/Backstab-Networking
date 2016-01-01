@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 
 public class NetworkLevelLoader : NetScript {
 	static int lastLevel = -108;
@@ -18,7 +19,7 @@ public class NetworkLevelLoader : NetScript {
 		Rpc("LoadLevel", level);
 	}
 
-	[RpcAll]
+	[RpcAll(qosType = QosType.ReliableSequenced)]
 	private void LoadLevel (int level) {
 		Application.LoadLevel(level);
 		if (backstab.IsClient) {
@@ -30,7 +31,7 @@ public class NetworkLevelLoader : NetScript {
 		lastLevel = level;
 	}
 
-	[RpcServer]
+	[RpcServer(qosType = QosType.ReliableSequenced)]
 	public void OnClientFinishedLoading () {
 		status[backstab.recConnectionId] = true;
 
@@ -43,7 +44,7 @@ public class NetworkLevelLoader : NetScript {
 
 	//NOTE: Use OnNetworkLoadedLevel only if you're sure you need it.
 	//If you spawn a NetScript that spawns more of itself, this loop will never terminate.
-	[RpcAll]
+	[RpcAll(qosType = QosType.ReliableSequenced)]
 	public void OnLoadingFinished (int level) {
 		for (int i = 0; i < NetScript.Instances.Count; i++) {
 			NetScript.Instances[i].OnNetworkLoadedLevel(level);
