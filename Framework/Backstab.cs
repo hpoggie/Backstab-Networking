@@ -259,7 +259,11 @@ public class Backstab : MonoBehaviour {
 
 	static void GetRpc (RpcData rpc) {
 		NetScript inst = NetScript.Find(rpc.sceneId);
-		inst.RecieveRpc(rpc);
+		if (inst != null) {
+			inst.RecieveRpc(rpc);
+		} else {
+			Debug.LogError(string.Format("NetScript {0} not found when trying to call {1}.", rpc.sceneId, rpc.methodId));
+		}
 	}
 
 	//Private functions
