@@ -50,7 +50,7 @@ public class NetScript : MonoBehaviour {
 
 		InvokeRepeating("OnSync", syncInterval, syncInterval);
 	}
-	/*
+
 	void OnDestroy () {
 		instances.Remove(this);
 		foreach (NetScript n in instances) {
@@ -59,7 +59,7 @@ public class NetScript : MonoBehaviour {
 			}
 		}
 	}
-	*/
+
 	public virtual void OnBackstabStartServer () { ; }
 	public virtual void OnBackstabStartClient () { ; }
 	public virtual void OnBackstabStopServer () { ; }
