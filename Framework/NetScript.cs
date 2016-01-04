@@ -24,21 +24,21 @@ public class NetScript : MonoBehaviour {
 	private static List<NetScript> instances = new List<NetScript>();
 	public static List<NetScript> Instances { get { return instances; } }
 	public static float syncInterval = 0.1f;
-	
+
 	public Backstab backstab;
-	
+
 	private int viewId;
 	public int ViewId { get { return viewId; } }
 	private MethodInfo[] rpcs = new MethodInfo[256];
 	private byte currentSize = 0;
-	
+
 	private BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
 	void Awake () {
 		viewId = instances.Count;
 		instances.Add(this);
 		if (!backstab) backstab = FindObjectOfType<Backstab>();
-		
+
 		foreach (MethodInfo m in GetType().GetMethods(flags)) {
 			foreach (Attribute a in m.GetCustomAttributes(true)) {
 				RpcAttribute r = a as RpcAttribute;
@@ -63,13 +63,13 @@ public class NetScript : MonoBehaviour {
 	public virtual void OnBackstabStartServer () { ; }
 	public virtual void OnBackstabStartClient () { ; }
 	public virtual void OnBackstabStopServer () { ; }
-	
+
 	public virtual void OnBackstabConnectedToServer (ConnectionData data) { ; }
 	public virtual void OnBackstabClientConnected (ConnectionData data) { ; }
 	public virtual void OnBackstabDisconnectedFromServer () { ; }
 	public virtual void OnBackstabClientDisconnected () { ; }
 	public virtual void OnBackstabFailedToConnect () { ; }
-	
+
 	public virtual void OnBackstabGotBroadcast () { ; }
 	protected virtual void OnSync () { ; }
 
@@ -85,7 +85,7 @@ public class NetScript : MonoBehaviour {
 			Debug.LogError("Null method passed to RegisterRpc. Make sure your Rpcs are public.");
 		}
 	}
-	
+
 	//Rpc
 
 	protected void Rpc (string fname, params System.Object[] args) {
@@ -113,7 +113,7 @@ public class NetScript : MonoBehaviour {
 			}
 		}
 	}
-	
+
 	protected void RpcClients (string fname, params object[] args) {
 		byte index = GetMethodIndex(fname);
 		QosType qosType = QosType.Reliable;
@@ -128,14 +128,14 @@ public class NetScript : MonoBehaviour {
 	protected void RpcServer (string fname, params object[] args) {
 		byte index = GetMethodIndex(fname);
 		QosType qosType = QosType.Reliable;
-		
+
 		foreach (Attribute a in rpcs[index].GetCustomAttributes(true)) {
 			if (a is RpcAttribute) qosType = (a as RpcAttribute).qosType;
 		}
-		
+
 		RpcServer(index, qosType, args);
 	}
-	
+
 	protected void RpcSpecific (string fname, int connectionId, params object[] args) {
 		byte index = GetMethodIndex(fname);
 		QosType qosType = QosType.Reliable;
@@ -153,10 +153,10 @@ public class NetScript : MonoBehaviour {
 		if (backstab.IsServer) {
 			Debug.LogError("Can't send to server if already server.");
 			return;
-		} 
+		}
 		backstab.Rpc(viewId, methodId, qosType, 1, args);
 	}
-	
+
 	//Recieving
 
 	public void RecieveRpc (RpcData rpc) {
@@ -176,7 +176,7 @@ public class NetScript : MonoBehaviour {
 				attr = (a as InputCommandAttribute);
 			}
 		}
-		
+
 		try {
 			m.Invoke(this, rpc.args);
 		} catch (TargetParameterCountException e) {
