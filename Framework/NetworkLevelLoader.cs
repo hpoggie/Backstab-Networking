@@ -5,6 +5,7 @@ public class NetworkLevelLoader : NetScript {
 	static int lastLevel = -108;
 
 	bool[] status;
+	bool hasServerLoaded = false;
 
 	public void Start () {
 		DontDestroyOnLoad(this);
@@ -15,18 +16,26 @@ public class NetworkLevelLoader : NetScript {
 			Debug.LogError("Can't issue LoadLevel messages if not the server.");
 			return;
 		}
-		status = new bool[backstab.NumConnections+1];
+		status = new bool[backstab.NumConnections];
 		Rpc("LoadLevel", level);
+		LoadLevel(level);
 	}
 
-	[RpcAll(qosType = QosType.ReliableSequenced)]
+	[RpcClients(qosType = QosType.ReliableSequenced)]
 	private void LoadLevel (int level) {
 		Application.LoadLevel(level);
+	}
+
+	void OnLevelWasLoaded (int level) {
 		if (backstab.IsClient) {
 			Rpc("OnClientFinishedLoading");
 		} else {
-			backstab.recConnectionId = 0;
-			OnClientFinishedLoading();
+			hasServerLoaded = true;
+
+			if (HasEveryoneLoaded()) {
+				Rpc("OnLoadingFinished", lastLevel);
+				OnLoadingFinished(lastLevel);
+			}
 		}
 		lastLevel = level;
 	}
@@ -35,19 +44,30 @@ public class NetworkLevelLoader : NetScript {
 	public void OnClientFinishedLoading () {
 		status[backstab.recConnectionId] = true;
 
+		if (HasEveryoneLoaded()) {
+			Rpc("OnLoadingFinished", lastLevel);
+		}
+	}
+
+	public bool HasEveryoneLoaded () {
+		if (!hasServerLoaded) return false;
+		if (status == null || status.Length == 0) return true;
+
 		foreach (bool b in status) {
-			if (!b) return;
+			if (!b) return false;
 		}
 
-		Rpc("OnLoadingFinished", lastLevel);
+		return true;
 	}
 
 	//NOTE: Use OnNetworkLoadedLevel only if you're sure you need it.
 	//If you spawn a NetScript that spawns more of itself, this loop will never terminate.
-	[RpcAll(qosType = QosType.ReliableSequenced)]
+	[RpcClients(qosType = QosType.ReliableSequenced)]
 	public void OnLoadingFinished (int level) {
 		for (int i = 0; i < NetScript.Instances.Count; i++) {
-			NetScript.Instances[i].OnNetworkLoadedLevel(level);
+			if (NetScript.Find(i) != null) {
+				NetScript.Find(i).OnNetworkLoadedLevel(level);
+			}
 		}
 	}
 }
