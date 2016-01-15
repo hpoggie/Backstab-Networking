@@ -16,7 +16,6 @@ public class RpcAttribute : Attribute {
 	public RpcAttribute (QosType qosType) { this.qosType = qosType; }
 }
 public class RpcClientsAttribute : RpcAttribute { }
-public class RpcAllAttribute : RpcAttribute { }
 public class RpcServerAttribute : RpcAttribute { }
 public class InputCommandAttribute : RpcAttribute { }
 
@@ -98,10 +97,6 @@ public class NetScript : MonoBehaviour {
 				if (a is RpcServerAttribute && backstab.IsClient) {
 					RpcServer(index, qosType, args);
 				} else if (a is RpcClientsAttribute && backstab.IsServer) {
-					RpcClients(index, qosType, args);
-				} else if (a is RpcAllAttribute && backstab.IsServer) {
-					backstab.recConnectionId = 0;
-					rpcs[index].Invoke(this, args);
 					RpcClients(index, qosType, args);
 				} else if (a is InputCommandAttribute && backstab.IsServer) {
 					backstab.recConnectionId = 0;
