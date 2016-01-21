@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class NetworkLevelLoader : NetScript {
 	static int lastLevel = -108;
@@ -23,7 +24,7 @@ public class NetworkLevelLoader : NetScript {
 
 	[RpcClients(qosType = QosType.ReliableSequenced)]
 	private void LoadLevel (int level) {
-		Application.LoadLevel(level);
+		SceneManager.LoadScene(level);
 	}
 
 	void OnLevelWasLoaded (int level) {
