@@ -418,11 +418,18 @@ public class Backstab : MonoBehaviour {
 		for (int i = 0; i < clientConnectionIds.Length; i++) {
 			if (clientConnectionIds[i] == connectionId) return i;
 		}
+		Debug.LogError("Could not find index for connectionId " +connectionId);
 		return -1;
 	}
 
 	public int GetRecClientIndex () {
 		return GetClientIndex(recConnectionId);
+	}
+
+	public void ListConnectionIds () {
+		for (int i = 0; i < clientConnectionIds.Length; i++) {
+			Debug.Log(String.Format("index {0} connectionId {1}", i, clientConnectionIds[i]));
+		}
 	}
 
 	//Non-static
