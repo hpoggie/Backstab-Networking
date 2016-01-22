@@ -42,8 +42,13 @@ public class NetworkLevelLoader : NetScript {
 	}
 
 	[RpcServer(qosType = QosType.ReliableSequenced)]
-	public void OnClientFinishedLoading () {
-		status[backstab.recConnectionId] = true;
+	private void OnClientFinishedLoading () {
+		int recClientIndex = backstab.GetRecClientIndex();
+		if (recClientIndex == -1) {
+			Debug.LogError("Recieved message from a non-connected client.");
+		} else {
+			status[recClientIndex]= true;
+		}
 
 		if (HasEveryoneLoaded()) {
 			Rpc("OnLoadingFinished", lastLevel);
@@ -64,7 +69,7 @@ public class NetworkLevelLoader : NetScript {
 	//NOTE: Use OnNetworkLoadedLevel only if you're sure you need it.
 	//If you spawn a NetScript that spawns more of itself, this loop will never terminate.
 	[RpcClients(qosType = QosType.ReliableSequenced)]
-	public void OnLoadingFinished (int level) {
+	private void OnLoadingFinished (int level) {
 		for (int i = 0; i < NetScript.Instances.Count; i++) {
 			if (NetScript.Find(i) != null) {
 				NetScript.Find(i).OnNetworkLoadedLevel(level);
